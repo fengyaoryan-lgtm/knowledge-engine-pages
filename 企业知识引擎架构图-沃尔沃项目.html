@@ -1,0 +1,402 @@
+npx @tiktok-fe/skills add zengduju/skills --skill sensight --source local<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>企业知识引擎架构图 — 沃尔沃亚太全域用户研究</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { height: 100%; }
+  body {
+    font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    background: #f5f7fa;
+    color: #1d2129;
+    min-height: 100%;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+  .header {
+    background: linear-gradient(135deg, #0d1b3e 0%, #162c5e 50%, #1a3a6e 100%);
+    padding: 22px 40px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .logo-mark { width: 38px; height: 38px; background: linear-gradient(135deg, #3370ff, #5b8ff9); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .header h1 { font-size: 17px; font-weight: 600; color: #fff; }
+  .header-sub { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 1px; }
+  .header-badge { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 6px 16px; font-size: 12px; color: rgba(255,255,255,0.6); }
+  .canvas { max-width: 1260px; margin: 0 auto; padding: 28px 20px 60px; }
+  .house { position: relative; width: 100%; }
+  .roof-wrap { display: flex; flex-direction: column; align-items: center; margin-bottom: -2px; position: relative; z-index: 2; }
+  .roof-triangle { width: 0; height: 0; border-left: 610px solid transparent; border-right: 610px solid transparent; border-bottom: 90px solid #0d1b3e; filter: drop-shadow(0 -3px 16px rgba(13,27,62,0.18)); }
+  .roof-content { position: absolute; bottom: 10px; text-align: center; z-index: 3; }
+  .roof-content h2 { font-size: 19px; font-weight: 700; color: #fff; letter-spacing: 1px; }
+  .roof-content p { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+  .floor { border-left: 3px solid #0d1b3e; border-right: 3px solid #0d1b3e; position: relative; }
+  .floor:last-child { border-bottom: 4px solid #0d1b3e; border-radius: 0 0 4px 4px; }
+  .floor-label { position: absolute; left: -3px; top: 0; bottom: 0; width: 34px; background: #0d1b3e; display: flex; align-items: center; justify-content: center; writing-mode: vertical-rl; text-orientation: mixed; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.75); letter-spacing: 3px; z-index: 2; }
+  .floor-title { font-size: 12px; font-weight: 600; letter-spacing: 1px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .floor-title::before { content: ''; width: 3px; height: 14px; border-radius: 2px; flex-shrink: 0; }
+  .floor-vision { background: linear-gradient(135deg, #0d1b3e 0%, #162c5e 100%); padding: 20px 20px 20px 52px; display: flex; align-items: center; justify-content: center; gap: 32px; }
+  .vision-item { text-align: center; flex: 1; max-width: 220px; }
+  .vision-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; }
+  .vision-item h4 { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 2px; }
+  .vision-item p { font-size: 10.5px; color: rgba(255,255,255,0.45); line-height: 1.5; }
+  .floor-agent { background: linear-gradient(135deg, #f0f5ff 0%, #f5f8ff 100%); padding: 20px 20px 20px 52px; border-top: 2px dashed rgba(51,112,255,0.15); }
+  .floor-agent .floor-title { color: #3370ff; }
+  .floor-agent .floor-title::before { background: #3370ff; }
+  .agent-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .agent-card { background: #fff; border-radius: 10px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid #e8ecf2; }
+  .agent-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .agent-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .agent-card h5 { font-size: 13px; font-weight: 600; color: #1d2129; }
+  .agent-card .agent-owner { font-size: 11px; color: #a0a7b3; }
+  .agent-features { display: flex; flex-wrap: wrap; gap: 4px; }
+  .agent-features span { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 500; }
+  .floor-core { background: #fff; padding: 24px 20px 24px 52px; border-top: 2px solid #0d1b3e; }
+  .floor-core .floor-title { color: #3370ff; }
+  .floor-core .floor-title::before { background: #3370ff; }
+  .core-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 14px; }
+  .core-card { border-radius: 12px; padding: 20px; position: relative; overflow: hidden; }
+  .core-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .core-card h5 { font-size: 15px; font-weight: 600; color: #1d2129; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .core-card .core-desc { font-size: 11.5px; color: #86909c; line-height: 1.6; margin-bottom: 14px; }
+  .core-kg { background: linear-gradient(160deg, #f0f5ff 0%, #fff 40%); border: 2px solid #3370ff; }
+  .core-kg::before { background: linear-gradient(90deg, #3370ff, #5b8ff9); }
+  .core-kg .core-badge { position: absolute; top: 12px; right: 12px; background: #3370ff; color: #fff; font-size: 10px; font-weight: 600; padding: 2px 10px; border-radius: 4px; }
+  .kg-capabilities { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .kg-cap { background: #fff; border: 1px solid #edf0f5; border-radius: 8px; padding: 10px 12px; transition: border-color 0.2s; }
+  .kg-cap:hover { border-color: #3370ff; }
+  .kg-cap h6 { font-size: 11.5px; font-weight: 600; color: #1d2129; margin-bottom: 2px; display: flex; align-items: center; gap: 5px; }
+  .kg-cap h6 .cd { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+  .kg-cap p { font-size: 10px; color: #a0a7b3; line-height: 1.4; padding-left: 10px; }
+  .core-rag { background: linear-gradient(160deg, #f5f8ff 0%, #fff 40%); border: 1px solid #e8ecf2; }
+  .core-rag::before { background: linear-gradient(90deg, #5b8ff9, #85b0ff); }
+  .core-onto { background: linear-gradient(160deg, #f8f5ff 0%, #fff 40%); border: 1px solid #e8ecf2; }
+  .core-onto::before { background: linear-gradient(90deg, #7c6cdb, #a78bfa); }
+  .sub-caps { display: flex; flex-direction: column; gap: 5px; margin-top: 4px; }
+  .sub-cap { display: flex; align-items: flex-start; gap: 6px; font-size: 11px; color: #4e5969; line-height: 1.4; }
+  .sub-cap .bl { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .synergy-bar { margin-top: 14px; background: linear-gradient(90deg, #f0f5ff, #f5f8ff, #f8f5ff); border: 1px dashed #d5dbe5; border-radius: 8px; padding: 10px 16px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 12px; color: #4e5969; }
+  .synergy-tag { padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .floor-pipeline { background: #fafbfc; padding: 20px 20px 20px 52px; border-top: 2px solid #0d1b3e; }
+  .floor-pipeline .floor-title { color: #3370ff; }
+  .floor-pipeline .floor-title::before { background: #3370ff; }
+  .pipeline { display: flex; align-items: stretch; }
+  .pipe-step { flex: 1; background: #fff; border: 1px solid #e8ecf2; padding: 14px 10px; position: relative; text-align: center; }
+  .pipe-step:first-child { border-radius: 8px 0 0 8px; }
+  .pipe-step:last-child { border-radius: 0 8px 8px 0; }
+  .pipe-step:not(:last-child) { border-right: none; }
+  .pipe-step:hover { border-color: #3370ff; z-index: 1; }
+  .pipe-step::after { content: ''; position: absolute; right: -9px; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-top: 9px solid transparent; border-bottom: 9px solid transparent; border-left: 9px solid #d5dbe5; z-index: 2; }
+  .pipe-step:last-child::after { display: none; }
+  .pipe-num { width: 20px; height: 20px; border-radius: 50%; background: #3370ff; color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; }
+  .pipe-step h6 { font-size: 11.5px; font-weight: 600; color: #1d2129; margin-bottom: 3px; }
+  .pipe-step p { font-size: 10px; color: #a0a7b3; }
+  .pipe-tags { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 5px; justify-content: center; }
+  .pipe-tag { padding: 2px 6px; background: #f0f5ff; border-radius: 3px; font-size: 9.5px; color: #3370ff; }
+  .floor-data { background: #f7f8fa; padding: 20px 20px 20px 52px; border-top: 2px solid #0d1b3e; }
+  .floor-data .floor-title { color: #3370ff; }
+  .floor-data .floor-title::before { background: #3370ff; }
+  .data-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .data-group { background: #fff; border-radius: 10px; padding: 14px 16px; border: 1px solid #e8ecf2; }
+  .data-group-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .data-group-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .data-group h6 { font-size: 12.5px; font-weight: 600; color: #1d2129; }
+  .data-items { display: flex; flex-wrap: wrap; gap: 6px; }
+  .data-item { display: flex; align-items: center; gap: 5px; padding: 5px 10px; background: #f5f7fa; border-radius: 6px; font-size: 11px; color: #4e5969; border: 1px solid transparent; transition: all 0.15s; }
+  .data-item:hover { border-color: #3370ff; background: #f0f5ff; }
+  .dd { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+  .floor-infra { background: linear-gradient(135deg, #0d1b3e 0%, #162c5e 100%); padding: 14px 20px 14px 52px; border-top: 2px solid #0d1b3e; }
+  .floor-infra .floor-title { font-size: 10px; color: rgba(255,255,255,0.4); letter-spacing: 2px; margin-bottom: 8px; }
+  .infra-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .infra-chip { display: flex; align-items: center; gap: 5px; padding: 4px 11px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 5px; font-size: 11px; color: rgba(255,255,255,0.6); }
+  .id { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ===== KG INTERACTIVE GRAPH ===== */
+  .kg-section { margin-top: 36px; background: #fff; border-radius: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); border: 1px solid #e8ecf2; overflow: hidden; }
+  .kg-hd { padding: 18px 24px; border-bottom: 1px solid #edf0f5; display: flex; align-items: center; justify-content: space-between; }
+  .kg-hd h3 { font-size: 16px; font-weight: 600; color: #1d2129; display: flex; align-items: center; gap: 8px; }
+  .kg-hd .hint { font-size: 11px; color: #a0a7b3; }
+  .kg-body { display: flex; min-height: 520px; }
+  .g-canvas { flex: 1; position: relative; background: #fafbfc; overflow: hidden; min-height: 520px; }
+  .g-canvas svg { width: 100%; height: 100%; position: absolute; inset: 0; }
+  .dp { width: 380px; flex-shrink: 0; border-left: 1px solid #edf0f5; background: #fff; display: flex; flex-direction: column; overflow-y: auto; }
+  .dp-hd { padding: 16px 20px; border-bottom: 1px solid #edf0f5; display: flex; align-items: center; gap: 12px; }
+  .dp-ic { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .dp-hd h4 { font-size: 15px; font-weight: 600; color: #1d2129; }
+  .dp-hd .dp-tp { font-size: 11px; color: #a0a7b3; }
+  .dp-sec { padding: 14px 20px; border-bottom: 1px solid #f5f7fa; }
+  .dp-st { font-size: 11px; font-weight: 600; color: #3370ff; letter-spacing: 1px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .dp-st::before { content: ''; width: 3px; height: 12px; background: #3370ff; border-radius: 2px; }
+  .pt { width: 100%; }
+  .pt tr { border-bottom: 1px solid #f5f7fa; }
+  .pt tr:last-child { border-bottom: none; }
+  .pt td { padding: 6px 0; font-size: 12px; vertical-align: top; }
+  .pt .pk { color: #86909c; width: 100px; font-weight: 500; }
+  .pt .pv { color: #1d2129; }
+  .pv .tg { display: inline-block; padding: 1px 7px; border-radius: 3px; font-size: 10.5px; font-weight: 500; margin: 1px 2px; }
+  .rl { display: flex; flex-direction: column; gap: 6px; }
+  .ri { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f5f7fa; border-radius: 8px; font-size: 12px; cursor: pointer; transition: background 0.15s; }
+  .ri:hover { background: #f0f5ff; }
+  .ri .ra { font-size: 10px; color: #3370ff; flex-shrink: 0; background: #e8f0ff; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+  .ri .rt { font-weight: 600; color: #1d2129; }
+  .ri .rtt { margin-left: auto; font-size: 10px; color: #a0a7b3; background: #fff; padding: 2px 6px; border-radius: 3px; border: 1px solid #edf0f5; }
+
+  /* Scenarios */
+  .sc-sec { margin-top: 28px; }
+  .sc-sec > h3 { font-size: 16px; font-weight: 600; color: #1d2129; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .sc-sec > .ss { font-size: 12px; color: #a0a7b3; margin-bottom: 16px; }
+  .sg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+  .sc { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid #e8ecf2; transition: all 0.2s; }
+  .sc:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.06); transform: translateY(-1px); }
+  .sh { padding: 14px 16px 10px; position: relative; }
+  .sh::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #3370ff, #5b8ff9); }
+  .sn { font-size: 10px; font-weight: 600; color: #3370ff; letter-spacing: 1px; margin-bottom: 4px; }
+  .sh h5 { font-size: 14px; font-weight: 600; color: #1d2129; margin-bottom: 3px; }
+  .sh .sr { font-size: 10.5px; color: #a0a7b3; }
+  .sb { padding: 0 16px 14px; }
+  .sb .sd { font-size: 11.5px; color: #4e5969; line-height: 1.6; margin-bottom: 10px; }
+  .ef { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+  .en { padding: 3px 9px; border-radius: 12px; font-size: 10.5px; font-weight: 600; border: 1.5px solid; }
+  .ee { font-size: 10px; color: #a0a7b3; padding: 0 1px; }
+  .vg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .vc { background: #fff; border-radius: 10px; padding: 16px; border: 1px solid #e8ecf2; transition: all 0.2s; }
+  .vc:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.05); }
+  .vn { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .vc h6 { font-size: 12.5px; font-weight: 600; color: #1d2129; margin-bottom: 3px; }
+  .vc p { font-size: 10.5px; color: #a0a7b3; line-height: 1.5; }
+  .footer-note { text-align: center; margin-top: 36px; font-size: 11px; color: #c9cdd4; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo-mark"><svg width="20" height="20" viewBox="0 0 200 200" fill="none"><path d="M60 170 L100 30 L115 90 L140 30 L105 170Z" fill="#fff"/><path d="M105 170 L140 30 L130 90 L160 50 L120 170Z" fill="rgba(255,255,255,0.55)"/></svg></div>
+    <div><h1>企业知识引擎 · 产品架构全景图</h1><div class="header-sub">沃尔沃亚太智能制造部门 — 全域用户研究项目</div></div>
+  </div>
+  <div class="header-badge">火山引擎 · Data Agent 产品矩阵</div>
+</header>
+
+<div class="canvas">
+<div class="house">
+  <div class="roof-wrap"><div class="roof-triangle"></div><div class="roof-content"><h2>全域 VOC 智能决策平台</h2><p>Voice of Customer · 数据驱动 · AI 赋能</p></div></div>
+
+  <div class="floor floor-vision">
+    <div class="floor-label">愿 景</div>
+    <div class="vision-item"><div class="vision-icon" style="background:linear-gradient(135deg,#3370ff,#5b8ff9)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h4>拉通各部门数据</h4><p>消除数据孤岛<br/>统一语义口径</p></div>
+    <div class="vision-item"><div class="vision-icon" style="background:linear-gradient(135deg,#5b8ff9,#85b0ff)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h4>AI 补充置信度</h4><p>基于来源追溯<br/>量化结论可信度</p></div>
+    <div class="vision-item"><div class="vision-icon" style="background:linear-gradient(135deg,#4dabf5,#3370ff)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="#fff" stroke-width="1.8"/><path d="M21 21l-4.35-4.35" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></div><h4>细化到产品颗粒度</h4><p>用研到产品迭代<br/>缩短落地距离</p></div>
+    <div class="vision-item"><div class="vision-icon" style="background:linear-gradient(135deg,#7c6cdb,#a78bfa)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="#fff" stroke-width="1.8"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></div><h4>模拟沉默用户发声</h4><p>基于行为画像<br/>AI 虚拟调研</p></div>
+  </div>
+
+  <div class="floor floor-agent">
+    <div class="floor-label">应 用 层</div>
+    <div class="floor-title">Agent 应用层 — 面向业务的智能交互入口</div>
+    <div class="agent-grid">
+      <div class="agent-card"><div class="agent-card-head"><div class="agent-icon" style="background:#f0f5ff"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 20V10M12 20V4M6 20v-6" stroke="#3370ff" stroke-width="2" stroke-linecap="round"/></svg></div><div><h5>分析 Agent</h5><span class="agent-owner">@刘然 @罗兴</span></div></div><div class="agent-features"><span style="background:#f0f5ff;color:#3370ff">自然语言问答</span><span style="background:#f0f5ff;color:#3370ff">交叉分析</span><span style="background:#f0f5ff;color:#3370ff">置信度评估</span><span style="background:#f0f5ff;color:#3370ff">产品改进建议</span></div></div>
+      <div class="agent-card"><div class="agent-card-head"><div class="agent-icon" style="background:#f3f0ff"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="#7c6cdb" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="7" r="4" stroke="#7c6cdb" stroke-width="2"/></svg></div><div><h5>虚拟人调研 Agent</h5><span class="agent-owner">@江益</span></div></div><div class="agent-features"><span style="background:#f3f0ff;color:#7c6cdb">聚类人群画像</span><span style="background:#f3f0ff;color:#7c6cdb">模拟用户发声</span><span style="background:#f3f0ff;color:#7c6cdb">定向问卷</span><span style="background:#f3f0ff;color:#7c6cdb">深度访谈</span></div></div>
+      <div class="agent-card"><div class="agent-card-head"><div class="agent-icon" style="background:#e8f8f5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="#0fb9a8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><h5>统一问答入口</h5><span class="agent-owner">@刘然 @钱江 @汪磊</span></div></div><div class="agent-features"><span style="background:#e8f8f5;color:#0fb9a8">多业务方接入</span><span style="background:#e8f8f5;color:#0fb9a8">灵活获取信息</span><span style="background:#e8f8f5;color:#0fb9a8">图谱+RAG混合</span><span style="background:#e8f8f5;color:#0fb9a8">权限管控</span></div></div>
+    </div>
+  </div>
+
+  <div class="floor floor-core">
+    <div class="floor-label">核 心 层</div>
+    <div class="floor-title">知识引擎核心能力 — 三大引擎协同驱动</div>
+    <div class="core-grid">
+      <div class="core-card core-kg"><span class="core-badge">核心引擎</span><h5><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="3" stroke="#3370ff" stroke-width="1.8"/><circle cx="5" cy="19" r="3" stroke="#3370ff" stroke-width="1.8"/><circle cx="19" cy="19" r="3" stroke="#3370ff" stroke-width="1.8"/><path d="M10.5 7.5L6.5 16.5M13.5 7.5l4 9M7.5 19h9" stroke="#3370ff" stroke-width="1.5" stroke-dasharray="3 2"/></svg> 知识图谱</h5><div class="core-desc">将散落在各数据源中的非结构化信息转化为「实体-关系-实体」结构化网络，实现跨文档关联与多跳推理</div><div class="kg-capabilities"><div class="kg-cap"><h6><span class="cd" style="background:#3370ff"></span>LLM 驱动构建</h6><p>大模型自动抽取实体与关系</p></div><div class="kg-cap"><h6><span class="cd" style="background:#5b8ff9"></span>可定制实体类型</h6><p>内置5类+自定义（车型/用户群/零部件）</p></div><div class="kg-cap"><h6><span class="cd" style="background:#4dabf5"></span>增量 & 全量更新</h6><p>增量处理变更；全量完整重建</p></div><div class="kg-cap"><h6><span class="cd" style="background:#85b0ff"></span>子图检索可视化</h6><p>从任意节点按深度探索关系网络</p></div><div class="kg-cap"><h6><span class="cd" style="background:#7c6cdb"></span>语义图谱查询</h6><p>自然语言自动转化为图谱检索</p></div><div class="kg-cap"><h6><span class="cd" style="background:#0fb9a8"></span>多知识库关联</h6><p>单图谱关联多知识库跨源建模</p></div></div></div>
+      <div class="core-card core-rag"><h5><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="#5b8ff9" stroke-width="1.8"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="#5b8ff9" stroke-width="1.8" stroke-linecap="round"/></svg> RAG 检索引擎</h5><div class="core-desc">"找得到" — 从海量文档精准检索</div><div class="sub-caps"><div class="sub-cap"><span class="bl" style="background:#5b8ff9"></span>稠密+稀疏混合检索</div><div class="sub-cap"><span class="bl" style="background:#5b8ff9"></span>向量相似度+关键词匹配</div><div class="sub-cap"><span class="bl" style="background:#5b8ff9"></span>结果重排序 & 高亮</div><div class="sub-cap"><span class="bl" style="background:#5b8ff9"></span>多格式文档解析（20+）</div><div class="sub-cap"><span class="bl" style="background:#5b8ff9"></span>语义切片 & 质量检测</div><div class="sub-cap"><span class="bl" style="background:#5b8ff9"></span>自动关键词 & QA 生成</div></div></div>
+      <div class="core-card core-onto"><h5><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#7c6cdb" stroke-width="1.8"/><path d="M3 9h18M9 3v18" stroke="#7c6cdb" stroke-width="1.8"/></svg> 本体建模</h5><div class="core-desc">"管得住" — 定义标准化分类体系</div><div class="sub-caps"><div class="sub-cap"><span class="bl" style="background:#7c6cdb"></span>字符/数值/时间多字段</div><div class="sub-cap"><span class="bl" style="background:#7c6cdb"></span>ClickHouse 列映射</div><div class="sub-cap"><span class="bl" style="background:#7c6cdb"></span>版本控制 & 状态管理</div><div class="sub-cap"><span class="bl" style="background:#7c6cdb"></span>ETL / 图谱 / CK引用</div><div class="sub-cap"><span class="bl" style="background:#7c6cdb"></span>结构化数据查询重建</div><div class="sub-cap"><span class="bl" style="background:#7c6cdb"></span>汽车产品 L1-L3 标签</div></div></div>
+    </div>
+    <div class="synergy-bar"><span class="synergy-tag" style="background:#f0f5ff;color:#3370ff">知识图谱「看得清」</span><span style="color:#c0c8d4">—</span><span class="synergy-tag" style="background:#f0f5ff;color:#5b8ff9">RAG 检索「找得到」</span><span style="color:#c0c8d4">—</span><span class="synergy-tag" style="background:#f3f0ff;color:#7c6cdb">本体建模「管得住」</span><span style="color:#a0a7b3;font-size:10.5px;margin-left:6px">三大能力协同 → Agent 统一消费</span></div>
+  </div>
+
+  <div class="floor floor-pipeline">
+    <div class="floor-label">处 理 层</div>
+    <div class="floor-title">数据处理流水线 — 从原始数据到知识资产</div>
+    <div class="pipeline">
+      <div class="pipe-step"><div class="pipe-num">1</div><h6>格式解析</h6><p>20+格式识别</p><div class="pipe-tags"><span class="pipe-tag">PDF</span><span class="pipe-tag">Word</span><span class="pipe-tag">Excel</span><span class="pipe-tag">OCR</span></div></div>
+      <div class="pipe-step"><div class="pipe-num">2</div><h6>智能切片</h6><p>语义段落切分</p><div class="pipe-tags"><span class="pipe-tag">按段落</span><span class="pipe-tag">按页面</span><span class="pipe-tag">自定义</span></div></div>
+      <div class="pipe-step"><div class="pipe-num">3</div><h6>知识增强</h6><p>LLM自动提取</p><div class="pipe-tags"><span class="pipe-tag">关键词</span><span class="pipe-tag">QA对</span><span class="pipe-tag">分词</span></div></div>
+      <div class="pipe-step"><div class="pipe-num">4</div><h6>向量化入库</h6><p>Embedding索引</p><div class="pipe-tags"><span class="pipe-tag">向量索引</span><span class="pipe-tag">倒排索引</span></div></div>
+      <div class="pipe-step"><div class="pipe-num">5</div><h6>实体抽取</h6><p>LLM识别关系</p><div class="pipe-tags"><span class="pipe-tag">车型</span><span class="pipe-tag">用户群</span><span class="pipe-tag">零部件</span></div></div>
+      <div class="pipe-step"><div class="pipe-num">6</div><h6>图谱融合</h6><p>跨文档对齐</p><div class="pipe-tags"><span class="pipe-tag">实体对齐</span><span class="pipe-tag">冲突检测</span></div></div>
+      <div class="pipe-step"><div class="pipe-num">7</div><h6>图谱存储</h6><p>写入图数据库</p><div class="pipe-tags"><span class="pipe-tag">TuGraph</span><span class="pipe-tag">状态追踪</span></div></div>
+    </div>
+  </div>
+
+  <div class="floor floor-data">
+    <div class="floor-label">数 据 层</div>
+    <div class="floor-title">多源异构数据接入 — 沃尔沃全域数据融合</div>
+    <div class="data-grid">
+      <div class="data-group"><div class="data-group-head"><div class="data-group-icon" style="background:#f0f5ff"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#3370ff" stroke-width="2"/></svg></div><h6>私域数据</h6></div><div class="data-items"><div class="data-item"><span class="dd" style="background:#3370ff"></span>L1 · CDP用户标签/行为</div><div class="data-item"><span class="dd" style="background:#5b8ff9"></span>L2 · 车联网信号数据</div><div class="data-item"><span class="dd" style="background:#4dabf5"></span>L3 · 投诉工单明细</div><div class="data-item"><span class="dd" style="background:#85b0ff"></span>L4 · 历史用研报告</div></div></div>
+      <div class="data-group"><div class="data-group-head"><div class="data-group-icon" style="background:#f3f0ff"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#7c6cdb" stroke-width="2"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" stroke="#7c6cdb" stroke-width="2"/></svg></div><h6>公域数据</h6></div><div class="data-items"><div class="data-item"><span class="dd" style="background:#7c6cdb"></span>抖音视频/评论</div><div class="data-item"><span class="dd" style="background:#a78bfa"></span>车域洞察L3打标</div><div class="data-item"><span class="dd" style="background:#0fb9a8"></span>人群画像标签</div><div class="data-item"><span class="dd" style="background:#5b8ff9"></span>聚类结果</div></div></div>
+    </div>
+  </div>
+
+  <div class="floor floor-infra">
+    <div class="floor-label" style="color:rgba(255,255,255,0.5)">基 础</div>
+    <div class="floor-title">基础设施层</div>
+    <div class="infra-row">
+      <div class="infra-chip"><span class="id" style="background:#3370ff"></span>TuGraph 图数据库</div>
+      <div class="infra-chip"><span class="id" style="background:#5b8ff9"></span>OpenSearch 检索</div>
+      <div class="infra-chip"><span class="id" style="background:#85b0ff"></span>Redis 缓存</div>
+      <div class="infra-chip"><span class="id" style="background:#4dabf5"></span>MySQL 元数据</div>
+      <div class="infra-chip"><span class="id" style="background:#7c6cdb"></span>ClickHouse 分析</div>
+      <div class="infra-chip"><span class="id" style="background:#a78bfa"></span>豆包大模型</div>
+      <div class="infra-chip"><span class="id" style="background:#0fb9a8"></span>S3/TOS 存储</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ INTERACTIVE KG ============ -->
+<div class="kg-section">
+  <div class="kg-hd">
+    <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="3" stroke="#3370ff" stroke-width="2"/><circle cx="5" cy="19" r="3" stroke="#3370ff" stroke-width="2"/><circle cx="19" cy="19" r="3" stroke="#3370ff" stroke-width="2"/><path d="M10.5 7.5L6.5 16.5M13.5 7.5l4 9M7.5 19h9" stroke="#3370ff" stroke-width="1.8" stroke-dasharray="3 2"/></svg> 沃尔沃 · 人×车知识图谱示例</h3>
+    <span class="hint">点击节点查看「主体 · 主体关系 · 主体属性」三元组详情</span>
+  </div>
+  <div class="kg-body">
+    <div class="g-canvas" id="gc"><svg id="gs" xmlns="http://www.w3.org/2000/svg"><defs><filter id="ns" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur in="SourceAlpha" stdDeviation="3" result="b"/><feOffset dx="0" dy="2" result="o"/><feComponentTransfer result="a"><feFuncA type="linear" slope="0.1"/></feComponentTransfer><feMerge><feMergeNode in="a"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs></svg></div>
+    <div class="dp" id="dp">
+      <div class="dp-hd" id="dh"><div class="dp-ic" id="di" style="background:#f0f5ff"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="#3370ff" stroke-width="2"/></svg></div><div><h4 id="dn">请选择节点</h4><span class="dp-tp" id="dt">点击左侧图谱节点查看详情</span></div></div>
+      <div class="dp-sec"><div class="dp-st">主体属性</div><table class="pt" id="ptt"><tr><td class="pk">—</td><td class="pv">选择节点后显示</td></tr></table></div>
+      <div class="dp-sec"><div class="dp-st">主体关系</div><div class="rl" id="rll"><div class="ri" style="justify-content:center;color:#a0a7b3;font-size:11px;cursor:default">选择节点后显示关系</div></div></div>
+      <div class="dp-sec"><div class="dp-st">主体信息</div><div id="ei" style="font-size:12px;color:#86909c">选择节点后显示</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SCENARIOS ============ -->
+<div class="sc-sec">
+  <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="3" stroke="#3370ff" stroke-width="2"/><circle cx="5" cy="19" r="3" stroke="#3370ff" stroke-width="2"/><circle cx="19" cy="19" r="3" stroke="#3370ff" stroke-width="2"/><path d="M10.5 7.5L6.5 16.5M13.5 7.5l4 9M7.5 19h9" stroke="#3370ff" stroke-width="1.8" stroke-dasharray="3 2"/></svg> 知识图谱 · 三大应用场景</h3>
+  <p class="ss">知识图谱如何将散落数据转化为可推理的关系网络，直接赋能业务决策</p>
+  <div class="sg">
+    <div class="sc"><div class="sh"><div class="sn">SCENARIO 01</div><h5>人×车 关系图谱</h5><div class="sr">对应需求2 — 按用户群体/按车型交叉分析</div></div><div class="sb"><div class="sd">自定义5类实体类型，构建「人-车-特征-渠道-反馈」完整关系网络。<br/><strong>车→人</strong>：XC70各平台反馈分布<br/><strong>人→车</strong>：30-50w用户对XC70不满集中点</div><div class="ef"><span class="en" style="border-color:#3370ff;color:#3370ff;background:#f0f5ff">用户群体</span><span class="ee">—[关注]→</span><span class="en" style="border-color:#5b8ff9;color:#5b8ff9;background:#f0f7ff">XC70</span><span class="ee">—[包含]→</span><span class="en" style="border-color:#0fb9a8;color:#0fb9a8;background:#e8f8f5">座椅系统</span><span class="ee">←[针对]—</span><span class="en" style="border-color:#e8a035;color:#e8a035;background:#fdf6ec">负面反馈</span></div></div></div>
+    <div class="sc"><div class="sh"><div class="sn">SCENARIO 02</div><h5>产品需求细粒度挖掘</h5><div class="sr">对应需求5 — 结论落地到零部件级别</div></div><div class="sb"><div class="sd">产品特征多级建模，LLM抽取时自动关联子特征：<br/><strong>「座椅不舒服」</strong> → 宽度/腰托/材质<br/><strong>「冬天座椅凉」</strong> → 加热速度/温度档位</div><div class="ef"><span class="en" style="border-color:#3370ff;color:#3370ff;background:#f0f5ff">座椅系统</span><span class="ee">→</span><span class="en" style="border-color:#5b8ff9;color:#5b8ff9;background:#f0f7ff">座椅宽度</span><span class="en" style="border-color:#5b8ff9;color:#5b8ff9;background:#f0f7ff">腰托高度</span><span class="en" style="border-color:#5b8ff9;color:#5b8ff9;background:#f0f7ff">座椅材质</span><span class="en" style="border-color:#5b8ff9;color:#5b8ff9;background:#f0f7ff">加热系统</span></div></div></div>
+    <div class="sc"><div class="sh" style=""><div class="sn">SCENARIO 03</div><h5>跨部门结论冲突发现</h5><div class="sr">对应痛点1 — 不同部门结论相互矛盾</div></div><div class="sb"><div class="sd">各部门历史报告接入图谱，同一产品特征节点自动汇聚不同结论。系统识别矛盾，追溯<strong>数据来源、样本量、调研方式</strong>。</div><div class="ef"><span class="en" style="border-color:#7c6cdb;color:#7c6cdb;background:#f3f0ff">销售部结论</span><span class="ee">—[针对]→</span><span class="en" style="border-color:#3370ff;color:#3370ff;background:#f0f5ff">座椅硬度</span><span class="ee">←[针对]—</span><span class="en" style="border-color:#7c6cdb;color:#7c6cdb;background:#f3f0ff">产品部结论</span></div></div></div>
+  </div>
+  <h3 style="margin-top:8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="#3370ff" stroke-width="2" stroke-linecap="round"/><path d="M22 4L12 14.01l-3-3" stroke="#3370ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 知识图谱 · 六大核心价值</h3>
+  <p class="ss" style="margin-bottom:14px">知识图谱如何支撑项目四大目标和五项核心需求</p>
+  <div class="vg">
+    <div class="vc"><div class="vn" style="background:#3370ff">1</div><h6>数据孤岛消除</h6><p>私域+公域融合同一张关系网络，各部门统一实体与关系</p></div>
+    <div class="vc"><div class="vn" style="background:#5b8ff9">2</div><h6>人×车双向查询</h6><p>图谱天然支持「人→车」「车→人」双向路径</p></div>
+    <div class="vc"><div class="vn" style="background:#4dabf5">3</div><h6>置信度来源追溯</h6><p>节点携带来源信息，AI Agent自动评估结论可信度</p></div>
+    <div class="vc"><div class="vn" style="background:#7c6cdb">4</div><h6>聚类结果入图</h6><p>人群聚类以实体接入，虚拟人Agent获取目标群体特征</p></div>
+    <div class="vc"><div class="vn" style="background:#85b0ff">5</div><h6>多级特征建模</h6><p>L1→L2→L3，反馈细化到可执行改进方向</p></div>
+    <div class="vc"><div class="vn" style="background:#0fb9a8">6</div><h6>结构化知识底座</h6><p>Agent从「文本片段回答」升级为「知识网络推理」</p></div>
+  </div>
+</div>
+<div class="footer-note">火山引擎 · 企业知识引擎 · Data Agent | 沃尔沃亚太全域用户研究项目 | 2026.03</div>
+</div>
+
+<script>
+const D={nodes:[
+{id:'xc70',label:'XC70',x:.50,y:.38,r:30,color:'#3370ff',type:'车型',props:{'价格区间':'30-50万','车型级别':'中大型SUV','上市年份':'2024','关注人群数':'12,847','公域讨论量':'45,231条','情感正面率':'72.3%'},entity:'车型实体 — 代表沃尔沃旗下具体车型。由文档和社交媒体数据中自动抽取，可关联用户群体、产品特征、反馈观点等多类实体。'},
+{id:'xc90',label:'XC90',x:.72,y:.22,r:22,color:'#5b8ff9',type:'车型',props:{'价格区间':'50-80万','车型级别':'全尺寸SUV','上市年份':'2023','关注人群数':'9,563','公域讨论量':'38,102条','情感正面率':'78.6%'},entity:'车型实体 — 沃尔沃旗舰SUV，面向高端家庭用户市场。'},
+{id:'uA',label:'科技尝鲜型',x:.22,y:.22,r:24,color:'#4dabf5',type:'用户群体',props:{'年龄段':'25-35岁','收入水平':'中高','聚类人数':'3,426','主要平台':'抖音, 小红书','关注车型':'XC70, EX30','典型标签':'科技爱好者、新能源关注'},entity:'用户群体实体 — 由人群聚类算法自动划分的细分群体，包含典型画像特征和行为偏好。'},
+{id:'uB',label:'家庭品质型',x:.20,y:.58,r:24,color:'#4dabf5',type:'用户群体',props:{'年龄段':'35-45岁','收入水平':'高','聚类人数':'5,891','主要平台':'线下调研, 抖音','关注车型':'XC90, XC70','典型标签':'注重安全、家庭出行'},entity:'用户群体实体 — 以家庭为核心的高净值用户群，对安全性和空间有强偏好。'},
+{id:'seat',label:'座椅系统',x:.58,y:.62,r:22,color:'#0fb9a8',type:'产品特征',props:{'特征级别':'L1','所属车型':'XC70, XC90','子特征数':'6项','负面反馈量':'2,847条','关注度排名':'#1','改进优先级':'P0'},entity:'产品特征实体 — L1级别的整车功能模块，由用研报告和用户反馈中自动抽取，支持多级下钻到L2/L3。'},
+{id:'adas',label:'智能驾驶',x:.82,y:.48,r:20,color:'#0fb9a8',type:'产品特征',props:{'特征级别':'L1','所属车型':'XC70, XC90','子特征数':'4项','正面反馈量':'5,123条','关注度排名':'#2','改进优先级':'P1'},entity:'产品特征实体 — 智能驾驶辅助系统，沃尔沃核心技术亮点。'},
+{id:'lum',label:'腰托支撑',x:.42,y:.82,r:16,color:'#85b0ff',type:'产品子特征',props:{'特征级别':'L2','上级特征':'座椅系统','负面反馈量':'1,203条','高频关键词':'腰酸、支撑不足、调节困难','数据来源':'抖音评论+投诉工单','调研样本量':'2,341'},entity:'产品子特征实体 — L2级别的具体部件/功能点，可进一步细化到L3维度。'},
+{id:'heat',label:'座椅加热',x:.68,y:.82,r:16,color:'#85b0ff',type:'产品子特征',props:{'特征级别':'L2','上级特征':'座椅系统','负面反馈量':'876条','高频关键词':'加热慢、冬天不够热','数据来源':'投诉工单+线下调研','调研样本量':'1,567'},entity:'产品子特征实体 — 座椅加热功能的用户反馈聚合节点。'},
+{id:'dy',label:'抖音',x:.12,y:.40,r:18,color:'#7c6cdb',type:'渠道',props:{'平台类型':'公域社交媒体','覆盖视频数':'12,456条','覆盖评论数':'45,231条','主要内容':'车评, 体验, 吐槽','数据时间':'2024.01-2026.02','L3打标覆盖率':'89.3%'},entity:'渠道实体 — 数据采集的社交媒体/调研渠道来源，支撑置信度评估和来源追溯。'},
+{id:'fn',label:'座椅太硬',x:.36,y:.55,r:15,color:'#e8a035',type:'反馈观点',props:{'情感倾向':'负面','提及频次':'1,847次','涉及车型':'XC70(68%), XC90(32%)','来源渠道':'抖音(45%), 工单(35%), 调研(20%)','关联子特征':'腰托支撑、座椅硬度','置信度评分':'0.82'},entity:'反馈观点实体 — 从用户评论、投诉工单、调研报告中抽取的具体观点，携带情感倾向、频次、来源等属性。'},
+{id:'fp',label:'安全性好',x:.88,y:.30,r:15,color:'#52c41a',type:'反馈观点',props:{'情感倾向':'正面','提及频次':'5,623次','涉及车型':'XC90(72%), XC70(28%)','来源渠道':'抖音(52%), 小红书(30%), 调研(18%)','关联特征':'智能驾驶、车身结构','置信度评分':'0.91'},entity:'反馈观点实体 — 用户对沃尔沃安全性的正面评价聚合，来源广泛、样本量大、置信度高。'},
+],edges:[
+{s:'uA',t:'xc70',label:'关注'},{s:'uB',t:'xc90',label:'拥有'},{s:'uB',t:'xc70',label:'关注'},
+{s:'xc70',t:'seat',label:'包含'},{s:'xc90',t:'seat',label:'包含'},{s:'xc70',t:'adas',label:'包含'},{s:'xc90',t:'adas',label:'包含'},
+{s:'seat',t:'lum',label:'包含子特征'},{s:'seat',t:'heat',label:'包含子特征'},
+{s:'fn',t:'seat',label:'针对'},{s:'fn',t:'lum',label:'具体指向'},{s:'fp',t:'adas',label:'针对'},
+{s:'uA',t:'dy',label:'活跃于'},{s:'fn',t:'dy',label:'来源于'},{s:'fp',t:'dy',label:'来源于'},
+]};
+(function(){
+const svg=document.getElementById('gs'),wrap=document.getElementById('gc');
+const nm={};D.nodes.forEach(n=>nm[n.id]=n);
+let sel=null;
+function render(){
+const W=wrap.clientWidth,H=wrap.clientHeight;
+svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+while(svg.childNodes.length>1){if(svg.lastChild!==svg.firstChild)svg.removeChild(svg.lastChild);}
+const eG=document.createElementNS('http://www.w3.org/2000/svg','g');
+const nG=document.createElementNS('http://www.w3.org/2000/svg','g');
+svg.appendChild(eG);svg.appendChild(nG);
+const pos={};D.nodes.forEach(n=>{pos[n.id]={x:n.x*W,y:n.y*H};});
+D.edges.forEach(e=>{
+const s=pos[e.s],t=pos[e.t];
+const mx=(s.x+t.x)/2,my=(s.y+t.y)/2;
+const dx=t.x-s.x,dy=t.y-s.y,len=Math.sqrt(dx*dx+dy*dy)||1;
+const off=Math.min(len*.12,30);
+const nx=-dy/len,ny=dx/len,cx=mx+nx*off,cy=my+ny*off;
+const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+p.setAttribute('d',`M ${s.x},${s.y} Q ${cx},${cy} ${t.x},${t.y}`);
+p.setAttribute('fill','none');p.setAttribute('stroke','#d5dbe5');p.setAttribute('stroke-width','1.2');
+eG.appendChild(p);
+const lx=.25*s.x+.5*cx+.25*t.x,ly=.25*s.y+.5*cy+.25*t.y;
+const tx=document.createElementNS('http://www.w3.org/2000/svg','text');
+tx.setAttribute('x',lx);tx.setAttribute('y',ly-4);tx.setAttribute('text-anchor','middle');
+tx.setAttribute('font-size','10');tx.setAttribute('fill','#a0a7b3');
+tx.setAttribute('font-family','PingFang SC,Microsoft YaHei,sans-serif');
+tx.textContent=e.label;eG.appendChild(tx);
+});
+D.nodes.forEach(n=>{
+const p=pos[n.id],g=document.createElementNS('http://www.w3.org/2000/svg','g');
+g.style.cursor='pointer';
+const ring=document.createElementNS('http://www.w3.org/2000/svg','circle');
+ring.setAttribute('cx',p.x);ring.setAttribute('cy',p.y);ring.setAttribute('r',n.r+4);
+ring.setAttribute('fill','none');ring.setAttribute('stroke',sel===n.id?n.color:'transparent');
+ring.setAttribute('stroke-width','2');ring.setAttribute('stroke-dasharray','4 3');
+g.appendChild(ring);
+const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r',n.r);
+c.setAttribute('fill',n.color);c.setAttribute('filter','url(#ns)');
+c.setAttribute('opacity',sel&&sel!==n.id?'0.35':'1');
+g.appendChild(c);
+const lines=n.label.length>4?[n.label.slice(0,Math.ceil(n.label.length/2)),n.label.slice(Math.ceil(n.label.length/2))]:[n.label];
+lines.forEach((l,i)=>{
+const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+t.setAttribute('x',p.x);t.setAttribute('y',p.y+(i-(lines.length-1)/2)*13+4);
+t.setAttribute('text-anchor','middle');t.setAttribute('font-size',n.r>20?'12':'10');
+t.setAttribute('font-weight','600');t.setAttribute('fill','#fff');
+t.setAttribute('font-family','PingFang SC,Microsoft YaHei,sans-serif');
+t.textContent=l;g.appendChild(t);
+});
+const tt=document.createElementNS('http://www.w3.org/2000/svg','text');
+tt.setAttribute('x',p.x);tt.setAttribute('y',p.y+n.r+14);
+tt.setAttribute('text-anchor','middle');tt.setAttribute('font-size','10');
+tt.setAttribute('fill','#86909c');tt.setAttribute('font-family','PingFang SC,Microsoft YaHei,sans-serif');
+tt.textContent=n.type;g.appendChild(tt);
+g.addEventListener('click',()=>selNode(n.id));
+g.addEventListener('mouseenter',()=>{c.setAttribute('r',n.r+2);});
+g.addEventListener('mouseleave',()=>{c.setAttribute('r',n.r);});
+nG.appendChild(g);
+});
+}
+function selNode(id){
+sel=id;const n=nm[id];render();
+document.getElementById('dn').textContent=n.label;
+document.getElementById('dt').textContent=n.type+' 实体';
+document.getElementById('di').style.background=n.color+'18';
+document.getElementById('di').innerHTML=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="${n.color}" stroke-width="2.5"/></svg>`;
+let ph='';
+for(const[k,v]of Object.entries(n.props)){ph+=`<tr><td class="pk">${k}</td><td class="pv">${v}</td></tr>`;}
+document.getElementById('ptt').innerHTML=ph;
+const rels=D.edges.filter(e=>e.s===id||e.t===id);
+let rh='';
+rels.forEach(e=>{
+const isSrc=e.s===id;const oid=isSrc?e.t:e.s;const o=nm[oid];
+const arr=isSrc?`→ ${e.label} →`:`← ${e.label} ←`;
+rh+=`<div class="ri" onclick="window._sn('${oid}')"><span class="ra">${arr}</span><span class="rt">${o.label}</span><span class="rtt">${o.type}</span></div>`;
+});
+document.getElementById('rll').innerHTML=rh||'<div style="font-size:11px;color:#a0a7b3;text-align:center;padding:8px">无关联关系</div>';
+document.getElementById('ei').innerHTML=`<div style="line-height:1.7">${n.entity}</div>`;
+}
+window._sn=selNode;
+render();
+window.addEventListener('resize',render);
+// Auto-select XC70
+setTimeout(()=>selNode('xc70'),300);
+})();
+</script>
+</body>
+</html>

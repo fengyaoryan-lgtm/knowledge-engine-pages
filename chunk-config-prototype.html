@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>知识引擎 · 切片配置原型</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif; }
+    .strategy-card { transition: all 0.2s ease; cursor: pointer; }
+    .strategy-card:hover { transform: translateY(-2px); }
+    .strategy-card.selected { border-color: #6366f1; background: #eef2ff; }
+    .strategy-card.selected .card-icon { background: #6366f1; color: white; }
+    .tab-btn { transition: all 0.2s ease; }
+    .tab-btn.active { border-bottom: 2px solid #6366f1; color: #6366f1; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .slider-track { -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; background: #e5e7eb; outline: none; }
+    .slider-track::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #6366f1; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+    .chunk-card { transition: all 0.15s ease; }
+    .chunk-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .bar-fill { transition: width 0.5s ease; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; }
+    .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; cursor: pointer; inset: 0; background-color: #d1d5db; border-radius: 24px; transition: 0.3s; }
+    .toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.3s; }
+    input:checked + .toggle-slider { background-color: #6366f1; }
+    input:checked + .toggle-slider:before { transform: translateX(20px); }
+    .param-section { animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .histogram-bar { transition: height 0.5s ease; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <div>
+        <span class="text-base font-semibold text-gray-900">知识引擎 · 切片配置</span>
+        <span class="ml-2 text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">交互原型 v0.1</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-4 text-sm text-gray-500">
+      <span class="flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span>
+        知识库：产品手册 2024
+      </span>
+      <button class="bg-indigo-600 text-white px-4 py-1.5 rounded-lg text-sm hover:bg-indigo-700 transition">保存配置</button>
+    </div>
+  </header>
+
+  <!-- Tabs -->
+  <div class="bg-white border-b border-gray-200 px-6">
+    <div class="flex gap-0">
+      <button onclick="switchTab('config')" class="tab-btn active px-5 py-3.5 text-sm font-medium text-gray-600 border-b-2 border-transparent" id="tab-config">
+        ⚙️ 切片配置
+      </button>
+      <button onclick="switchTab('preview')" class="tab-btn px-5 py-3.5 text-sm font-medium text-gray-600 border-b-2 border-transparent" id="tab-preview">
+        👁 切片预览
+      </button>
+      <button onclick="switchTab('quality')" class="tab-btn px-5 py-3.5 text-sm font-medium text-gray-600 border-b-2 border-transparent" id="tab-quality">
+        📊 质量看板
+      </button>
+    </div>
+  </div>
+
+  <div class="max-w-5xl mx-auto px-6 py-8">
+
+    <!-- ===== TAB 1: 切片配置 ===== -->
+    <div id="panel-config" class="tab-panel active">
+
+      <!-- Step 1: 策略选择 -->
+      <div class="mb-8">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs flex items-center justify-center font-bold">1</span>
+          <h2 class="text-base font-semibold text-gray-900">选择切片策略</h2>
+        </div>
+        <p class="text-sm text-gray-500 ml-8 mb-4">不同策略适用于不同文档类型，系统将根据文档自动推荐</p>
+
+        <div class="grid grid-cols-5 gap-3">
+          <!-- 标准模式 -->
+          <div class="strategy-card selected bg-white rounded-xl p-4 border-2 border-gray-200 flex flex-col items-center text-center" onclick="selectStrategy('default', this)">
+            <div class="card-icon w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center mb-3 text-lg">⬛</div>
+            <div class="text-sm font-semibold text-gray-800 mb-1">标准模式</div>
+            <div class="text-xs text-gray-400 mb-2">通用文档</div>
+            <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">低成本</span>
+          </div>
+
+          <!-- 自定义模式 -->
+          <div class="strategy-card bg-white rounded-xl p-4 border-2 border-gray-200 flex flex-col items-center text-center" onclick="selectStrategy('custom', this)">
+            <div class="card-icon w-10 h-10 rounded-lg bg-gray-100 text-gray-500 flex items-center justify-center mb-3 text-lg">✂️</div>
+            <div class="text-sm font-semibold text-gray-800 mb-1">自定义模式</div>
+            <div class="text-xs text-gray-400 mb-2">结构化文本/代码</div>
+            <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">低成本</span>
+          </div>
+
+          <!-- 语义 AI -->
+          <div class="strategy-card bg-white rounded-xl p-4 border-2 border-gray-200 flex flex-col items-center text-center" onclick="selectStrategy('ai', this)">
+            <div class="card-icon w-10 h-10 rounded-lg bg-gray-100 text-gray-500 flex items-center justify-center mb-3 text-lg">🧠</div>
+            <div class="text-sm font-semibold text-gray-800 mb-1">语义 AI 模式</div>
+            <div class="text-xs text-gray-400 mb-2">报告/学术论文</div>
+            <span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">中等成本</span>
+          </div>
+
+          <!-- 智能上下文 -->
+          <div class="strategy-card bg-white rounded-xl p-4 border-2 border-gray-200 flex flex-col items-center text-center" onclick="selectStrategy('context_aware', this)">
+            <div class="card-icon w-10 h-10 rounded-lg bg-gray-100 text-gray-500 flex items-center justify-center mb-3 text-lg">🔍</div>
+            <div class="text-sm font-semibold text-gray-800 mb-1">智能上下文</div>
+            <div class="text-xs text-gray-400 mb-2">高价值文档</div>
+            <span class="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">较高成本</span>
+          </div>
+
+          <!-- Contextual 增强 -->
+          <div class="strategy-card bg-white rounded-xl p-4 border-2 border-gray-200 flex flex-col items-center text-center" onclick="selectStrategy('contextual', this)">
+            <div class="card-icon w-10 h-10 rounded-lg bg-gray-100 text-gray-500 flex items-center justify-center mb-3 text-lg">✨</div>
+            <div class="text-sm font-semibold text-gray-800 mb-1">Contextual 增强</div>
+            <div class="text-xs text-gray-400 mb-2">年报/混排内容</div>
+            <div class="flex gap-1 flex-wrap justify-center">
+              <span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">高成本</span>
+              <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">推荐★</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: 参数配置 -->
+      <div class="mb-8 bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs flex items-center justify-center font-bold">2</span>
+          <h2 class="text-base font-semibold text-gray-900">参数配置</h2>
+          <span class="ml-auto text-xs text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full" id="strategy-label">标准模式</span>
+        </div>
+
+        <div class="p-6 space-y-6">
+
+          <!-- Chunk 大小 -->
+          <div>
+            <div class="flex justify-between mb-2">
+              <label class="text-sm font-medium text-gray-700">Chunk 大小（maxToken）</label>
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-bold text-indigo-600" id="token-display">512</span>
+                <span class="text-xs text-gray-400">tokens</span>
+                <span class="text-xs text-gray-400 border border-gray-200 rounded px-1.5 py-0.5">≈ <span id="char-display">1536</span> 字</span>
+              </div>
+            </div>
+            <input type="range" min="1" max="3" step="1" value="2" class="slider-track w-full" id="token-slider" oninput="updateTokenSlider(this.value)">
+            <div class="flex justify-between text-xs text-gray-400 mt-1.5">
+              <span>256 tokens（精细）</span>
+              <span>512 tokens（推荐）</span>
+              <span>1024 tokens（大块）</span>
+            </div>
+          </div>
+
+          <!-- 重叠率 -->
+          <div>
+            <label class="text-sm font-medium text-gray-700 block mb-2">重叠率（Overlap）</label>
+            <div class="flex gap-3" id="overlap-options">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="overlap" value="0" class="accent-indigo-600" checked>
+                <span class="text-sm text-gray-600">不重叠（0%）</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="overlap" value="10" class="accent-indigo-600">
+                <span class="text-sm text-gray-600">轻度重叠（10%）</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="overlap" value="20" class="accent-indigo-600">
+                <span class="text-sm text-gray-600">标准重叠（20%）推荐</span>
+              </label>
+            </div>
+            <p class="text-xs text-gray-400 mt-1.5">重叠可防止语境在切片边界断裂，提升跨片段检索召回率约 +10%</p>
+          </div>
+
+          <!-- 自定义分隔符（仅 custom 模式） -->
+          <div id="custom-separator-section" class="hidden param-section">
+            <label class="text-sm font-medium text-gray-700 block mb-2">自定义分隔符</label>
+            <input type="text" placeholder="例如：## 或 \n\n 或 ====" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" id="custom-separator-input">
+            <p class="text-xs text-gray-400 mt-1.5">系统将在遇到此分隔符时进行切片，适合 Markdown 标题、代码注释等结构化文本</p>
+          </div>
+
+          <!-- Contextual 增强提示（仅 contextual 模式） -->
+          <div id="contextual-info-section" class="hidden param-section">
+            <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 flex gap-3">
+              <div class="text-indigo-500 mt-0.5">✨</div>
+              <div>
+                <div class="text-sm font-medium text-indigo-800 mb-1">Contextual 嵌入增强（Anthropic 方案）</div>
+                <div class="text-xs text-indigo-600">系统将为每个 Chunk 自动生成约 100 token 的上下文摘要前缀，存入 L0 摘要字段。检索时优先加载摘要，显著降低 Token 消耗，检索隔阈率降低 35~67%。</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 智能上下文提示（仅 context_aware 模式） -->
+          <div id="context-aware-info-section" class="hidden param-section">
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-3">
+              <div class="text-amber-500 mt-0.5">⚡</div>
+              <div>
+                <div class="text-sm font-medium text-amber-800 mb-1">智能上下文模式 — 额外 LLM 调用</div>
+                <div class="text-xs text-amber-600">此模式使用 LLM 理解文档结构后再切片，每个文档将消耗额外 LLM 调用（约 500~2000 tokens/文档）。建议仅用于高价值、需精确检索的核心文档。</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 格式感知推荐 -->
+          <div class="bg-blue-50 border border-blue-100 rounded-lg p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-blue-500 text-sm">💡</span>
+              <span class="text-sm font-medium text-blue-800">格式感知推荐</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-xs">
+              <div class="bg-white rounded-lg p-2 border border-blue-100">
+                <div class="font-medium text-gray-700 mb-1">PDF 年报/长文档</div>
+                <div class="text-gray-500">智能上下文 · 1024 tokens</div>
+              </div>
+              <div class="bg-white rounded-lg p-2 border border-blue-100">
+                <div class="font-medium text-gray-700 mb-1">Markdown / Wiki</div>
+                <div class="text-gray-500">语义 AI · 512 tokens</div>
+              </div>
+              <div class="bg-white rounded-lg p-2 border border-blue-100">
+                <div class="font-medium text-gray-700 mb-1">Excel / CSV</div>
+                <div class="text-gray-500">标准模式 · 256 tokens + 表格提取</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Step 3: 高级选项 -->
+      <div class="mb-8 bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <button onclick="toggleAdvanced()" class="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-gray-400 text-white text-xs flex items-center justify-center font-bold">3</span>
+            <h2 class="text-base font-semibold text-gray-900">高级选项</h2>
+            <span class="text-xs text-gray-400">（点击展开）</span>
+          </div>
+          <svg id="advanced-chevron" class="w-4 h-4 text-gray-400 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        <div id="advanced-section" class="hidden border-t border-gray-100 px-6 py-5">
+          <div class="grid grid-cols-2 gap-5">
+            <div class="flex items-center justify-between py-2">
+              <div>
+                <div class="text-sm font-medium text-gray-700">去除空白字符</div>
+                <div class="text-xs text-gray-400 mt-0.5">移除多余空格和换行</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="flex items-center justify-between py-2">
+              <div>
+                <div class="text-sm font-medium text-gray-700">去除图片 URL</div>
+                <div class="text-xs text-gray-400 mt-0.5">过滤文档中的图片链接</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="flex items-center justify-between py-2">
+              <div>
+                <div class="text-sm font-medium text-gray-700">图片内容提取</div>
+                <div class="text-xs text-gray-400 mt-0.5">识别图片中的文字内容</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="flex items-center justify-between py-2">
+              <div>
+                <div class="text-sm font-medium text-gray-700">表格内容提取</div>
+                <div class="text-xs text-gray-400 mt-0.5">将表格转换为结构化文本</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="flex items-center justify-between py-2 col-span-2">
+              <div>
+                <div class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  生成原子问题
+                  <span class="text-xs bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded">实验性</span>
+                </div>
+                <div class="text-xs text-gray-400 mt-0.5">为每个 Chunk 自动生成 3~5 个 QA 对，增强问答检索精度</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom actions -->
+      <div class="flex items-center justify-between">
+        <button class="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          重置为默认
+        </button>
+        <div class="flex gap-3">
+          <button class="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600 transition">保存配置</button>
+          <button onclick="switchTab('preview')" class="px-5 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center gap-2">
+            👁 预览切片效果
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB 2: 切片预览 ===== -->
+    <div id="panel-preview" class="tab-panel">
+
+      <!-- 统计卡片 -->
+      <div class="grid grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-xl p-4 border border-gray-200 text-center">
+          <div class="text-2xl font-bold text-gray-900">23</div>
+          <div class="text-xs text-gray-500 mt-1">总 Chunk 数</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 border border-gray-200 text-center">
+          <div class="text-2xl font-bold text-indigo-600">487</div>
+          <div class="text-xs text-gray-500 mt-1">平均 Token</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 border border-gray-200 text-center">
+          <div class="text-2xl font-bold text-amber-500">2</div>
+          <div class="text-xs text-gray-500 mt-1">过短 Chunk（&lt;50）</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 border border-gray-200 text-center">
+          <div class="text-2xl font-bold text-green-600">8.7%</div>
+          <div class="text-xs text-gray-500 mt-1">过短占比</div>
+        </div>
+      </div>
+
+      <!-- 顶部操作栏 -->
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-base font-semibold text-gray-900">切片预览</h2>
+          <p class="text-xs text-gray-400 mt-0.5">展示前 5 个 Chunk，使用当前切片配置进行试切（不入库）</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="switchTab('config')" class="px-4 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600 transition">调整参数</button>
+          <button class="px-4 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">✅ 确认入库</button>
+        </div>
+      </div>
+
+      <!-- Chunk 预览卡片 -->
+      <div class="space-y-3">
+
+        <!-- Chunk 1 -->
+        <div class="chunk-card bg-white rounded-xl border border-gray-200 p-5">
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-sm font-bold text-gray-400">#1</span>
+              <span class="badge text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg>
+                512 tokens
+              </span>
+              <span class="badge text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">📄 第 1 页</span>
+              <span class="badge text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">H1: 产品概述</span>
+              <span class="badge text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">TEXT</span>
+            </div>
+            <button class="text-xs text-gray-400 hover:text-gray-600">展开全文</button>
+          </div>
+          <div class="text-sm text-gray-700 leading-relaxed bg-gray-50 rounded-lg p-3 border-l-3 border-indigo-300">
+            本文档旨在描述知识引擎的切片能力设计与产品规划。知识引擎作为企业级 RAG 系统的核心组件，负责将原始文档转化为可检索的向量化片段。高质量的切片是保证检索精度的基础，直接决定了...
+          </div>
+        </div>
+
+        <!-- Chunk 2 -->
+        <div class="chunk-card bg-white rounded-xl border border-gray-200 p-5">
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-sm font-bold text-gray-400">#2</span>
+              <span class="badge text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg>
+                498 tokens
+              </span>
+              <span class="badge text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">📄 第 1 页</span>
+              <span class="badge text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">H2: 背景与现状</span>
+              <span class="badge text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">TEXT</span>
+            </div>
+            <button class="text-xs text-gray-400 hover:text-gray-600">展开全文</button>
+          </div>
+          <div class="text-sm text-gray-700 leading-relaxed bg-gray-50 rounded-lg p-3">
+            当前知识库系统在处理长文档时存在显著的切片质量问题。现有的 500 token 硬编码切片策略无法适应不同文档类型的需求，导致合同条款被截断、技术文档代码块破坏等问题，严重影响检索命中率...
+          </div>
+        </div>
+
+        <!-- Chunk 3 — 过短警告 -->
+        <div class="chunk-card bg-white rounded-xl border border-red-200 p-5">
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-sm font-bold text-gray-400">#3</span>
+              <span class="badge text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-semibold">
+                ⚠ 31 tokens — 过短
+              </span>
+              <span class="badge text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">📄 第 2 页</span>
+              <span class="badge text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full">IMAGE_CAPTION</span>
+            </div>
+            <div class="flex gap-1.5">
+              <button class="text-xs text-red-500 hover:text-red-700 border border-red-200 rounded px-2 py-0.5">删除</button>
+              <button class="text-xs text-gray-500 hover:text-gray-700 border border-gray-200 rounded px-2 py-0.5">合并</button>
+            </div>
+          </div>
+          <div class="text-sm text-gray-500 italic bg-red-50 rounded-lg p-3 border border-red-100">
+            图 2-1 知识引擎系统架构图
+          </div>
+          <div class="mt-2 text-xs text-red-500 flex items-center gap-1">
+            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            此 Chunk 过短，可能产生低质量向量，建议合并到相邻片段或删除
+          </div>
+        </div>
+
+        <!-- Chunk 4 -->
+        <div class="chunk-card bg-white rounded-xl border border-gray-200 p-5">
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-sm font-bold text-gray-400">#4</span>
+              <span class="badge text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg>
+                521 tokens
+              </span>
+              <span class="badge text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">📄 第 2 页</span>
+              <span class="badge text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">H2: 技术方案</span>
+              <span class="badge text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full">TABLE</span>
+            </div>
+            <button class="text-xs text-gray-400 hover:text-gray-600">展开全文</button>
+          </div>
+          <div class="text-sm text-gray-700 leading-relaxed bg-gray-50 rounded-lg p-3">
+            | 策略 | 技术实现 | 适用场景 | 预计 Token 成本 |
+            | 标准模式 | HierarchicalDocumentSplitter | 通用文档 | 低 |
+            | 自定义模式 | 用户指定分隔符 | 结构化文本/代码 | 低 |...
+          </div>
+        </div>
+
+        <!-- Chunk 5 -->
+        <div class="chunk-card bg-white rounded-xl border border-gray-200 p-5">
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-sm font-bold text-gray-400">#5</span>
+              <span class="badge text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg>
+                476 tokens
+              </span>
+              <span class="badge text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">📄 第 3 页</span>
+              <span class="badge text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">H2: 应用场景</span>
+              <span class="badge text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">TEXT</span>
+            </div>
+            <button class="text-xs text-gray-400 hover:text-gray-600">展开全文</button>
+          </div>
+          <div class="text-sm text-gray-700 leading-relaxed bg-gray-50 rounded-lg p-3">
+            法律合规团队在使用标准切片策略时面临合同条款被截断的问题。推荐使用智能上下文模式配合 1024 token 大小和 20% 重叠率，可将条款完整性保留率提升约 40%...
+          </div>
+        </div>
+
+      </div>
+
+      <div class="text-center mt-4 text-xs text-gray-400">仅展示前 5 个 Chunk，共 23 个</div>
+
+    </div>
+
+    <!-- ===== TAB 3: 质量看板 ===== -->
+    <div id="panel-quality" class="tab-panel">
+
+      <!-- 统计卡片 -->
+      <div class="grid grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-xl p-5 border border-gray-200">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-gray-500 font-medium">总 Chunk 数</span>
+            <span class="text-xs text-green-500 bg-green-50 px-1.5 py-0.5 rounded">正常</span>
+          </div>
+          <div class="text-3xl font-bold text-gray-900">4,823</div>
+          <div class="text-xs text-gray-400 mt-1">↑ 127 较上周</div>
+        </div>
+        <div class="bg-white rounded-xl p-5 border border-gray-200">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-gray-500 font-medium">平均 Token 长度</span>
+            <span class="text-xs text-green-500 bg-green-50 px-1.5 py-0.5 rounded">良好</span>
+          </div>
+          <div class="text-3xl font-bold text-indigo-600">487</div>
+          <div class="text-xs text-gray-400 mt-1">目标区间 256~512</div>
+        </div>
+        <div class="bg-white rounded-xl p-5 border border-gray-200">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-gray-500 font-medium">过短 Chunk 占比</span>
+            <span class="text-xs text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded">注意</span>
+          </div>
+          <div class="text-3xl font-bold text-amber-500">3.2%</div>
+          <div class="text-xs text-gray-400 mt-1">共 154 个，建议清理</div>
+        </div>
+        <div class="bg-white rounded-xl p-5 border border-gray-200">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-gray-500 font-medium">重复 Chunk</span>
+            <span class="text-xs text-red-500 bg-red-50 px-1.5 py-0.5 rounded">需处理</span>
+          </div>
+          <div class="text-3xl font-bold text-red-500">12</div>
+          <div class="text-xs text-gray-400 mt-1">相似度 &gt; 0.95</div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-5 gap-5 mb-6">
+
+        <!-- 分布直方图 -->
+        <div class="col-span-3 bg-white rounded-xl border border-gray-200 p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-semibold text-gray-800">Chunk 长度分布</h3>
+            <span class="text-xs text-gray-400">区间：50 tokens</span>
+          </div>
+          <div class="flex items-end gap-1.5 h-36">
+            <!-- 直方图柱 -->
+            <div class="flex flex-col items-center gap-1 flex-1">
+              <span class="text-xs text-red-500 font-bold">154</span>
+              <div class="w-full bg-red-300 rounded-t" style="height: 20%"></div>
+              <span class="text-xs text-gray-400">0-50</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 flex-1">
+              <span class="text-xs text-gray-500">289</span>
+              <div class="w-full bg-indigo-200 rounded-t" style="height: 38%"></div>
+              <span class="text-xs text-gray-400">50-100</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 flex-1">
+              <span class="text-xs text-gray-500">412</span>
+              <div class="w-full bg-indigo-300 rounded-t" style="height: 54%"></div>
+              <span class="text-xs text-gray-400">100-200</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 flex-1">
+              <span class="text-xs text-gray-500">623</span>
+              <div class="w-full bg-indigo-400 rounded-t" style="height: 82%"></div>
+              <span class="text-xs text-gray-400">200-300</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 flex-1">
+              <span class="text-xs text-gray-500">891</span>
+              <div class="w-full bg-indigo-500 rounded-t" style="height: 100%"></div>
+              <span class="text-xs text-gray-400">300-400</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 flex-1">
+              <span class="text-xs text-gray-500">1024</span>
+              <div class="w-full bg-indigo-600 rounded-t" style="height: 100%"></div>
+              <span class="text-xs text-gray-400">400-512</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 flex-1">
+              <span class="text-xs text-gray-500">756</span>
+              <div class="w-full bg-indigo-400 rounded-t" style="height: 74%"></div>
+              <span class="text-xs text-gray-400">512-600</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 flex-1">
+              <span class="text-xs text-gray-500">421</span>
+              <div class="w-full bg-indigo-300 rounded-t" style="height: 41%"></div>
+              <span class="text-xs text-gray-400">600-800</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 flex-1">
+              <span class="text-xs text-gray-500">183</span>
+              <div class="w-full bg-indigo-200 rounded-t" style="height: 18%"></div>
+              <span class="text-xs text-gray-400">800+</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 质量评分 -->
+        <div class="col-span-2 bg-white rounded-xl border border-gray-200 p-5">
+          <h3 class="text-sm font-semibold text-gray-800 mb-4">整体质量评分</h3>
+          <div class="flex flex-col items-center justify-center h-28">
+            <div class="text-5xl font-bold text-indigo-600 mb-1">82</div>
+            <div class="text-sm text-gray-500">/ 100</div>
+            <div class="text-xs text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full mt-2">良好</div>
+          </div>
+          <div class="space-y-2 mt-3">
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-gray-500 w-20">长度分布</span>
+              <div class="flex-1 h-1.5 bg-gray-100 rounded-full"><div class="h-1.5 bg-green-500 rounded-full" style="width:88%"></div></div>
+              <span class="text-xs text-gray-500">88</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-gray-500 w-20">内容完整性</span>
+              <div class="flex-1 h-1.5 bg-gray-100 rounded-full"><div class="h-1.5 bg-indigo-500 rounded-full" style="width:79%"></div></div>
+              <span class="text-xs text-gray-500">79</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-gray-500 w-20">重复率</span>
+              <div class="flex-1 h-1.5 bg-gray-100 rounded-full"><div class="h-1.5 bg-amber-500 rounded-full" style="width:74%"></div></div>
+              <span class="text-xs text-gray-500">74</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 问题 Chunk 列表 -->
+      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden mb-5">
+        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+          <h3 class="text-sm font-semibold text-gray-800">问题 Chunk 列表</h3>
+          <div class="flex gap-2">
+            <button class="text-xs px-3 py-1 bg-red-50 text-red-600 rounded-full border border-red-100 hover:bg-red-100 transition">过短 (154)</button>
+            <button class="text-xs px-3 py-1 bg-gray-50 text-gray-600 rounded-full border border-gray-100 hover:bg-gray-100 transition">重复 (12)</button>
+          </div>
+        </div>
+
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-gray-50 text-left">
+              <th class="px-5 py-3 text-xs font-medium text-gray-500">Chunk ID</th>
+              <th class="px-5 py-3 text-xs font-medium text-gray-500">类型</th>
+              <th class="px-5 py-3 text-xs font-medium text-gray-500">Token 数</th>
+              <th class="px-5 py-3 text-xs font-medium text-gray-500">来源文档</th>
+              <th class="px-5 py-3 text-xs font-medium text-gray-500">内容摘要</th>
+              <th class="px-5 py-3 text-xs font-medium text-gray-500">操作</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-50">
+            <tr class="hover:bg-gray-50">
+              <td class="px-5 py-3 text-xs text-gray-500 font-mono">chunk_0x1a2b</td>
+              <td class="px-5 py-3"><span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">过短</span></td>
+              <td class="px-5 py-3 text-xs font-bold text-red-500">31</td>
+              <td class="px-5 py-3 text-xs text-gray-500">产品手册_2024.pdf</td>
+              <td class="px-5 py-3 text-xs text-gray-600">图 2-1 系统架构图</td>
+              <td class="px-5 py-3">
+                <div class="flex gap-1.5">
+                  <button class="text-xs text-indigo-600 hover:underline">查看</button>
+                  <button class="text-xs text-red-500 hover:underline">删除</button>
+                  <button class="text-xs text-gray-500 hover:underline">合并</button>
+                </div>
+              </td>
+            </tr>
+            <tr class="hover:bg-gray-50">
+              <td class="px-5 py-3 text-xs text-gray-500 font-mono">chunk_0x3c4d</td>
+              <td class="px-5 py-3"><span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">过短</span></td>
+              <td class="px-5 py-3 text-xs font-bold text-red-500">18</td>
+              <td class="px-5 py-3 text-xs text-gray-500">SOP操作规范_v3.docx</td>
+              <td class="px-5 py-3 text-xs text-gray-600">注意事项：</td>
+              <td class="px-5 py-3">
+                <div class="flex gap-1.5">
+                  <button class="text-xs text-indigo-600 hover:underline">查看</button>
+                  <button class="text-xs text-red-500 hover:underline">删除</button>
+                  <button class="text-xs text-gray-500 hover:underline">合并</button>
+                </div>
+              </td>
+            </tr>
+            <tr class="hover:bg-gray-50">
+              <td class="px-5 py-3 text-xs text-gray-500 font-mono">chunk_0x5e6f</td>
+              <td class="px-5 py-3"><span class="text-xs bg-amber-100 text-amber-600 px-2 py-0.5 rounded-full">重复</span></td>
+              <td class="px-5 py-3 text-xs text-gray-500">487</td>
+              <td class="px-5 py-3 text-xs text-gray-500">合同模板_2024Q1.pdf</td>
+              <td class="px-5 py-3 text-xs text-gray-600">第三条 甲方应在...（与 chunk_0x7a8b 相似度 0.97）</td>
+              <td class="px-5 py-3">
+                <div class="flex gap-1.5">
+                  <button class="text-xs text-indigo-600 hover:underline">查看</button>
+                  <button class="text-xs text-amber-500 hover:underline">保留最新</button>
+                  <button class="text-xs text-red-500 hover:underline">删除</button>
+                </div>
+              </td>
+            </tr>
+            <tr class="hover:bg-gray-50">
+              <td class="px-5 py-3 text-xs text-gray-500 font-mono">chunk_0x9g0h</td>
+              <td class="px-5 py-3"><span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">过短</span></td>
+              <td class="px-5 py-3 text-xs font-bold text-red-500">43</td>
+              <td class="px-5 py-3 text-xs text-gray-500">技术规范_API.md</td>
+              <td class="px-5 py-3 text-xs text-gray-600">返回值说明</td>
+              <td class="px-5 py-3">
+                <div class="flex gap-1.5">
+                  <button class="text-xs text-indigo-600 hover:underline">查看</button>
+                  <button class="text-xs text-red-500 hover:underline">删除</button>
+                  <button class="text-xs text-gray-500 hover:underline">合并</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 底部操作 -->
+      <div class="flex items-center justify-between">
+        <div class="text-xs text-gray-400">共 166 个问题 Chunk（154 过短 + 12 重复）</div>
+        <div class="flex gap-3">
+          <button onclick="switchTab('config')" class="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600 transition">重新切片全部文档</button>
+          <button class="px-5 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition flex items-center gap-2">
+            🗑 一键清理低质量 Chunk
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Tab 切换
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('panel-' + tab).classList.add('active');
+      document.getElementById('tab-' + tab).classList.add('active');
+    }
+
+    // 策略选择
+    const strategyLabels = {
+      'default': '标准模式',
+      'custom': '自定义模式',
+      'ai': '语义 AI 模式',
+      'context_aware': '智能上下文模式',
+      'contextual': 'Contextual 增强模式'
+    };
+
+    function selectStrategy(type, el) {
+      document.querySelectorAll('.strategy-card').forEach(c => {
+        c.classList.remove('selected');
+        c.querySelector('.card-icon').className = 'card-icon w-10 h-10 rounded-lg bg-gray-100 text-gray-500 flex items-center justify-center mb-3 text-lg';
+      });
+      el.classList.add('selected');
+      el.querySelector('.card-icon').className = 'card-icon w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center mb-3 text-lg';
+
+      document.getElementById('strategy-label').textContent = strategyLabels[type];
+
+      // 显示/隐藏策略相关区块
+      document.getElementById('custom-separator-section').classList.add('hidden');
+      document.getElementById('contextual-info-section').classList.add('hidden');
+      document.getElementById('context-aware-info-section').classList.add('hidden');
+
+      if (type === 'custom') {
+        document.getElementById('custom-separator-section').classList.remove('hidden');
+      } else if (type === 'contextual') {
+        document.getElementById('contextual-info-section').classList.remove('hidden');
+      } else if (type === 'context_aware') {
+        document.getElementById('context-aware-info-section').classList.remove('hidden');
+      }
+    }
+
+    // Token 滑块
+    const tokenValues = { 1: 256, 2: 512, 3: 1024 };
+    function updateTokenSlider(val) {
+      const tokens = tokenValues[val];
+      document.getElementById('token-display').textContent = tokens;
+      document.getElementById('char-display').textContent = (tokens * 3).toLocaleString();
+    }
+
+    // 高级选项折叠
+    function toggleAdvanced() {
+      const section = document.getElementById('advanced-section');
+      const chevron = document.getElementById('advanced-chevron');
+      section.classList.toggle('hidden');
+      chevron.style.transform = section.classList.contains('hidden') ? '' : 'rotate(180deg)';
+    }
+  </script>
+</body>
+</html>
