@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>知识引擎 · 知识管理平台</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/dayjs@1/dayjs.min.js"></script>
+  <script crossorigin src="https://unpkg.com/antd@5/dist/antd.min.js"></script>
+  <script crossorigin src="https://unpkg.com/@ant-design/icons@5/dist/index.umd.min.js"></script>
+  <script crossorigin src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/antd@5/dist/reset.css">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue',sans-serif;background:#f0f2f5}
+    #root{min-height:100vh}
+
+    /* Nav */
+    .top-nav{height:48px;background:#fff;border-bottom:1px solid #e8e8e8;display:flex;align-items:center;padding:0 20px;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+    .top-nav .logo{display:flex;align-items:center;gap:8px;margin-right:32px}
+    .top-nav .logo-icon{width:24px;height:24px;background:linear-gradient(135deg,#1677ff,#4096ff);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px}
+    .top-nav .logo-text{font-size:14px;font-weight:600;color:#1d2129}
+    .top-nav .nav-items{display:flex;gap:4px;flex:1}
+    .top-nav .nav-item{padding:4px 16px;font-size:14px;color:#4e5969;cursor:pointer;border-radius:6px;transition:all .2s;line-height:40px}
+    .top-nav .nav-item:hover{background:#f2f3f5;color:#1d2129}
+    .top-nav .nav-item.active{color:#1677ff;background:#e8f3ff;font-weight:500}
+    .top-nav .nav-right{display:flex;align-items:center;gap:16px}
+    .top-nav .project-sel{font-size:13px;color:#4e5969;background:#f2f3f5;padding:4px 12px;border-radius:6px;cursor:pointer}
+
+    /* Stats */
+    .stat-card{background:#fff;border-radius:12px;padding:20px 24px;border:1px solid #f0f0f0;transition:all .2s;position:relative;overflow:hidden}
+    .stat-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.06)}
+    .stat-card .stat-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px}
+    .stat-card .stat-value{font-size:32px;font-weight:700;color:#1d2129;line-height:1}
+    .stat-card .stat-label{font-size:13px;color:#86909c;margin-top:6px}
+    .stat-card .stat-trend{font-size:12px;margin-top:8px;display:flex;align-items:center;gap:4px}
+    .stat-card .stat-bg{position:absolute;right:-10px;bottom:-10px;font-size:80px;opacity:.04;transform:rotate(-15deg)}
+
+    /* Search */
+    .search-section{background:#fff;border-radius:12px;padding:20px 24px;border:1px solid #f0f0f0;margin-bottom:16px}
+    .search-result-item{padding:16px;border:1px solid #f0f0f0;border-radius:8px;margin-bottom:8px;cursor:pointer;transition:all .15s}
+    .search-result-item:hover{border-color:#1677ff;background:#fafcff;box-shadow:0 2px 8px rgba(22,119,255,.06)}
+    .search-highlight{background:#fff3b0;padding:0 2px;border-radius:2px}
+
+    /* KB Table */
+    .kb-table-wrap{background:#fff;border-radius:12px;border:1px solid #f0f0f0;overflow:hidden}
+    .expand-doc-row{background:#fafafa}
+
+    /* Detail & Chunk pages */
+    .detail-header{padding:16px 24px;background:#fff;border-bottom:1px solid #e8e8e8}
+    .detail-meta{display:flex;gap:24px;font-size:13px;color:#86909c;margin-top:8px}
+    .detail-body{display:flex;min-height:calc(100vh - 48px - 130px - 46px)}
+    .sidebar{width:220px;background:#fff;border-right:1px solid #e8e8e8;padding:12px;overflow-y:auto;flex-shrink:0}
+    .sidebar-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:14px;font-weight:500;color:#1d2129;padding:4px 8px}
+    .folder-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:#4e5969;transition:all .15s}
+    .folder-item:hover{background:#f2f3f5}
+    .folder-item.active{background:#e8f3ff;color:#1677ff}
+    .content-area{flex:1;padding:16px 20px;overflow-y:auto;background:#f5f6f7}
+
+    .chunk-page{max-width:1000px;margin:0 auto;padding:24px}
+    .chunk-header{background:#fff;border-bottom:1px solid #e8e8e8;padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
+    .strategy-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
+    .strategy-card{background:#fff;border:2px solid #e8e8e8;border-radius:12px;padding:20px 12px;text-align:center;cursor:pointer;transition:all .2s}
+    .strategy-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.06)}
+    .strategy-card.selected{border-color:#1677ff;background:#e8f3ff}
+    .strategy-card .s-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:20px;background:#f2f3f5;color:#86909c;transition:all .2s}
+    .strategy-card.selected .s-icon{background:#1677ff;color:#fff}
+    .strategy-card .s-name{font-size:14px;font-weight:600;color:#1d2129;margin-bottom:4px}
+    .strategy-card .s-desc{font-size:12px;color:#86909c;margin-bottom:8px}
+
+    .chunk-item{background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:16px;margin-bottom:12px;transition:all .15s}
+    .chunk-item:hover{box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .chunk-item.warning{border-color:#ff4d4f}
+    .chunk-content{background:#f7f8fa;border-radius:6px;padding:12px;font-size:13px;color:#4e5969;line-height:1.8;border-left:3px solid #1677ff}
+    .chunk-item.warning .chunk-content{background:#fff2f0;border-left-color:#ff4d4f}
+
+    .quality-ring{width:120px;height:120px;border-radius:50%;background:conic-gradient(#1677ff 0% 82%,#f0f0f0 82% 100%);display:flex;align-items:center;justify-content:center;margin:0 auto}
+    .quality-inner{width:96px;height:96px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    .histogram-bar{transition:height .5s ease;border-radius:4px 4px 0 0}
+
+    .fade-in{animation:fadeIn .3s ease}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+    /* Mini trend chart */
+    .mini-trend{display:flex;align-items:flex-end;gap:2px;height:32px}
+    .mini-trend .bar{width:6px;border-radius:2px;background:#1677ff;opacity:.6;transition:height .3s}
+    .mini-trend .bar:last-child{opacity:1}
+
+    /* Distribution ring */
+    .dist-ring{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+    .dist-ring-inner{width:44px;height:44px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#1d2129}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useCallback, useMemo, useRef } = React;
+const {
+  Button, Table, Card, Tabs, Tag, Badge, Input, Select, Space, Breadcrumb,
+  Slider, Radio, Switch, Statistic, Progress, Row, Col, Tooltip, Modal,
+  message, Divider, Empty, Dropdown, Pagination, ConfigProvider, Typography,
+  Alert, Flex, Segmented, Descriptions
+} = antd;
+const { Title, Text, Paragraph } = Typography;
+const {
+  PlusOutlined, SearchOutlined, ReloadOutlined, ArrowLeftOutlined,
+  FolderOutlined, FolderOpenOutlined, FileTextOutlined, SettingOutlined,
+  EyeOutlined, BarChartOutlined, CheckCircleFilled, ExclamationCircleFilled,
+  DeleteOutlined, MergeCellsOutlined, DownOutlined, UpOutlined,
+  AppstoreOutlined, DatabaseOutlined, BulbOutlined, ThunderboltOutlined,
+  StarOutlined, EditOutlined, MoreOutlined, CloudUploadOutlined,
+  FileExcelOutlined, FilePdfOutlined, FileWordOutlined, FileMarkdownOutlined,
+  ClockCircleOutlined, UserOutlined, InfoCircleOutlined, RightOutlined,
+  ScissorOutlined, RobotOutlined, TeamOutlined, LockOutlined,
+  GlobalOutlined, FileSearchOutlined, RiseOutlined, FallOutlined,
+  BookOutlined, HddOutlined, PieChartOutlined, CopyOutlined,
+  SafetyCertificateOutlined, FilterOutlined, SortAscendingOutlined,
+  SwapOutlined, EnvironmentOutlined
+} = icons;
+
+// ============================
+// MOCK DATA
+// ============================
+const allKBs = [
+  // 个人知识库
+  { id:'kb1', name:'测试', desc:'测试知识库', type:'通用内容', scope:'personal', owner:'fengyao.ryan', updatedAt:'2026-03-18 15:41:51', createdAt:'2026-03-18 15:41:51', status:'active',
+    documents:[
+      { id:'d1', name:'交互校准.xlsx', size:'60.94 KB', sizeBytes:62402, chunks:261, status:'success', detection:'normal', tags:'-', category:'-', expiry:'永久有效', icon:'excel',
+        sampleContent:['交互设计校准标准V2.0版本，包含界面交互规范、动效标准、组件使用指南等内容','表格数据包含：按钮尺寸标准、间距规范、色彩对比度要求、无障碍设计标准'] }
+    ]},
+  { id:'kb2', name:'我的产品笔记', desc:'日常产品思考和竞品分析', type:'通用内容', scope:'personal', owner:'fengyao.ryan', updatedAt:'2026-03-18 10:22:30', createdAt:'2026-03-10 09:00:00', status:'active',
+    documents:[
+      { id:'d20', name:'竞品分析_知识库产品.md', size:'45 KB', sizeBytes:46080, chunks:38, status:'success', detection:'normal', tags:'竞品', category:'分析', expiry:'永久有效', icon:'markdown',
+        sampleContent:['主要竞品包括Notion AI、Confluence智能搜索、企业微信文档等','Notion AI的知识库检索准确率约78%，我们的目标是达到90%以上'] },
+      { id:'d21', name:'RAG效果评测报告.pdf', size:'1.2 MB', sizeBytes:1258291, chunks:89, status:'success', detection:'normal', tags:'评测', category:'报告', expiry:'永久有效', icon:'pdf',
+        sampleContent:['RAG检索准确率在Top-3召回下达到92.3%，Top-5召回下达到96.7%','Contextual增强模式相比标准模式，检索准确率提升约35%'] }
+    ]},
+  { id:'kb3', name:'API开发文档', desc:'内部API接口文档汇总', type:'通用内容', scope:'personal', owner:'fengyao.ryan', updatedAt:'2026-03-17 16:30:00', createdAt:'2026-03-05 14:00:00', status:'active',
+    documents:[
+      { id:'d30', name:'知识引擎API_v2.md', size:'128 KB', sizeBytes:131072, chunks:67, status:'success', detection:'normal', tags:'API', category:'技术文档', expiry:'永久有效', icon:'markdown',
+        sampleContent:['POST /api/v2/knowledge/search 全文检索接口，支持语义搜索和关键词搜索','认证方式：Bearer Token，通过 /api/v2/auth/token 获取'] },
+      { id:'d31', name:'SDK使用指南.md', size:'56 KB', sizeBytes:57344, chunks:34, status:'success', detection:'normal', tags:'SDK', category:'技术文档', expiry:'永久有效', icon:'markdown',
+        sampleContent:['Python SDK安装：pip install verag-sdk>=2.0.0','JavaScript SDK支持浏览器和Node.js环境'] }
+    ]},
+  { id:'kb16', name:'周报存档', desc:'2026年周报汇总', type:'通用内容', scope:'personal', owner:'fengyao.ryan', updatedAt:'2026-03-15 18:00:00', createdAt:'2026-01-06 09:00:00', status:'active',
+    documents:[
+      { id:'d160', name:'2026-W11周报.docx', size:'32 KB', sizeBytes:32768, chunks:12, status:'success', detection:'normal', tags:'周报', category:'-', expiry:'永久有效', icon:'word',
+        sampleContent:['本周完成：切片配置原型V1.0、知识质量看板需求评审','下周计划：完成Ant Design原型重构、启动飞书群聊Agent开发'] }
+    ]},
+  { id:'kb17', name:'学习笔记', desc:'技术学习笔记', type:'通用内容', scope:'personal', owner:'fengyao.ryan', updatedAt:'2026-03-14 21:00:00', createdAt:'2026-02-01 10:00:00', status:'active',
+    documents:[
+      { id:'d170', name:'LangChain实战笔记.md', size:'89 KB', sizeBytes:91136, chunks:52, status:'success', detection:'normal', tags:'学习', category:'笔记', expiry:'永久有效', icon:'markdown',
+        sampleContent:['LangChain的LCEL表达式链可以用|运算符串联多个处理步骤','RAG Pipeline的关键优化点：Retriever的top_k参数和reranker的阈值设置'] }
+    ]},
+
+  // 公共知识库
+  { id:'kb4', name:'denso_装修材料', desc:'denso_装修材料知识库', type:'通用内容', scope:'public', owner:'admin', updatedAt:'2026-03-18 12:45:23', createdAt:'2026-03-15 10:00:00', status:'active',
+    documents:[
+      { id:'d4', name:'装修材料规格表.xlsx', size:'120 KB', sizeBytes:122880, chunks:189, status:'success', detection:'normal', tags:'材料', category:'规格', expiry:'永久有效', icon:'excel',
+        sampleContent:['瓷砖型号DP-001，规格800x800mm，适用区域：客厅、卧室','乳胶漆品牌Nippon，型号净味全效，VOC含量≤50g/L'] },
+      { id:'d5', name:'施工工艺标准.pdf', size:'2.5 MB', sizeBytes:2621440, chunks:234, status:'success', detection:'normal', tags:'施工', category:'标准', expiry:'永久有效', icon:'pdf',
+        sampleContent:['瓷砖铺贴标准：平整度误差≤2mm/2m，空鼓率≤5%','防水施工要求：涂膜厚度≥1.5mm，闭水试验≥24小时'] },
+      { id:'d6', name:'常见问题FAQ.docx', size:'45 KB', sizeBytes:46080, chunks:56, status:'success', detection:'normal', tags:'FAQ', category:'问答', expiry:'永久有效', icon:'word',
+        sampleContent:['Q: 地暖房间适合用什么地板？A: 建议使用专用地暖复合地板，导热系数≥0.10W/(m·K)','Q: 墙面开裂如何处理？A: 首先判断裂缝类型，结构裂缝需专业处理，表面裂缝可用弹性腻子修补'] }
+    ]},
+  { id:'kb5', name:'deso_问答库', desc:'问答库', type:'QA问答', scope:'public', owner:'admin', updatedAt:'2026-03-18 12:00:16', createdAt:'2026-03-12 08:00:00', status:'active',
+    documents:[
+      { id:'d50', name:'客服FAQ_2026Q1.xlsx', size:'85 KB', sizeBytes:87040, chunks:320, status:'success', detection:'normal', tags:'FAQ', category:'客服', expiry:'2026-06-30', icon:'excel',
+        sampleContent:['Q: 如何重置密码？A: 点击登录页"忘记密码"，输入注册邮箱获取重置链接','Q: 如何导出数据报告？A: 进入数据中心→报表管理→选择报表→点击导出按钮'] }
+    ]},
+  { id:'kb6', name:'denso_模型总结_option_勿动', desc:'denso_模型总结_2', type:'通用内容', scope:'public', owner:'admin', updatedAt:'2026-03-18 11:37:32', createdAt:'2026-03-14 09:00:00', status:'active',
+    documents:[
+      { id:'d60', name:'模型效果总结报告.pdf', size:'3.1 MB', sizeBytes:3250585, chunks:178, status:'success', detection:'warning', tags:'模型', category:'报告', expiry:'永久有效', icon:'pdf',
+        sampleContent:['GPT-4o在知识问答任务上的准确率为87.3%，豆包大模型为84.1%','Embedding模型对比：text-embedding-3-large vs BGE-M3，在中文场景下BGE-M3表现更优'] }
+    ]},
+  { id:'kb7', name:'denso切片-大模型切片', desc:'演示测试', type:'通用内容', scope:'public', owner:'admin', updatedAt:'2026-03-17 21:30:43', createdAt:'2026-03-16 10:00:00', status:'active',
+    documents:[
+      { id:'d70', name:'切片效果对比.xlsx', size:'200 KB', sizeBytes:204800, chunks:145, status:'success', detection:'normal', tags:'切片', category:'评测', expiry:'永久有效', icon:'excel',
+        sampleContent:['标准切片模式平均Chunk长度487 tokens，过短率3.2%','Contextual增强模式平均Chunk长度512 tokens，过短率0.8%，但token消耗增加40%'] }
+    ]},
+  { id:'kb8', name:'pdf默认解析知识库', desc:'pdf默认解析知识库', type:'通用内容', scope:'public', owner:'admin', updatedAt:'2026-03-17 20:55:23', createdAt:'2026-03-15 11:00:00', status:'active',
+    documents:[
+      { id:'d80', name:'年度报告2025.pdf', size:'8.5 MB', sizeBytes:8912896, chunks:456, status:'success', detection:'normal', tags:'年报', category:'报告', expiry:'永久有效', icon:'pdf',
+        sampleContent:['2025年营收同比增长23.5%，净利润率达到15.2%','研发投入占营收比例18.7%，同比提升2.3个百分点'] }
+    ]},
+  { id:'kb9', name:'markdown默认切片知识库', desc:'markdown默认切片知识库', type:'通用内容', scope:'public', owner:'admin', updatedAt:'2026-03-17 20:51:24', createdAt:'2026-03-15 12:00:00', status:'active',
+    documents:[
+      { id:'d90', name:'技术架构文档.md', size:'67 KB', sizeBytes:68608, chunks:42, status:'success', detection:'normal', tags:'架构', category:'技术文档', expiry:'永久有效', icon:'markdown',
+        sampleContent:['系统采用微服务架构，核心服务包括：知识管理服务、检索服务、切片服务、向量化服务','数据存储层：MySQL(元数据) + Elasticsearch(全文索引) + Milvus(向量存储)'] }
+    ]},
+  { id:'kb10', name:'doc文件模型总结', desc:'doc文件模型总结', type:'通用内容', scope:'public', owner:'admin', updatedAt:'2026-03-17 17:27:56', createdAt:'2026-03-16 08:00:00', status:'active',
+    documents:[
+      { id:'d100', name:'模型训练日志.docx', size:'156 KB', sizeBytes:159744, chunks:78, status:'success', detection:'normal', tags:'模型', category:'日志', expiry:'永久有效', icon:'word',
+        sampleContent:['Fine-tuning epoch 10/20, loss: 0.342, val_acc: 91.2%','最佳checkpoint在epoch 15，验证集F1-score达到93.8%'] }
+    ]},
+  { id:'kb11', name:'doc上下文总结切片', desc:'doc上下文总结切片', type:'通用内容', scope:'public', owner:'admin', updatedAt:'2026-03-17 17:17:20', createdAt:'2026-03-16 09:00:00', status:'active',
+    documents:[ { id:'d110', name:'产品需求文档PRD.docx', size:'230 KB', sizeBytes:235520, chunks:112, status:'success', detection:'normal', tags:'PRD', category:'需求', expiry:'永久有效', icon:'word',
+        sampleContent:['需求背景：当前知识库切片质量参差不齐，需要提供可视化的质量监控面板','核心功能：切片策略配置、切片预览、质量看板、问题Chunk一键清理'] }
+    ]},
+  { id:'kb12', name:'切片策略效果评测', desc:'切片效果评测', type:'通用内容', scope:'public', owner:'admin', updatedAt:'2026-03-17 15:32:13', createdAt:'2026-03-10 10:00:00', status:'active',
+    documents:[
+      { id:'d120', name:'评测报告_v3.pdf', size:'4.2 MB', sizeBytes:4404019, chunks:267, status:'success', detection:'normal', tags:'评测', category:'报告', expiry:'永久有效', icon:'pdf',
+        sampleContent:['五种切片策略在不同文档类型上的检索准确率对比','Contextual增强在PDF年报类文档上表现最优，准确率97.2%'] },
+      { id:'d121', name:'评测数据集.xlsx', size:'350 KB', sizeBytes:358400, chunks:89, status:'success', detection:'normal', tags:'数据', category:'评测', expiry:'永久有效', icon:'excel',
+        sampleContent:['评测数据集包含500个问题-答案对，覆盖5种文档类型','数据来源：线上真实用户查询日志，经人工标注'] }
+    ]},
+  { id:'kb13', name:'denso上下文切片-勿动', desc:'denso上下文切片', type:'通用内容', scope:'public', owner:'admin', updatedAt:'2026-03-17 17:24:14', createdAt:'2026-03-16 11:00:00', status:'active',
+    documents:[ { id:'d130', name:'上下文切片配置.json', size:'12 KB', sizeBytes:12288, chunks:8, status:'success', detection:'normal', tags:'配置', category:'-', expiry:'永久有效', icon:'markdown',
+        sampleContent:['context_window: 2048, overlap_ratio: 0.2, min_chunk_size: 50'] }
+    ]},
+];
+
+// 构建可搜索的扁平索引
+const searchIndex = [];
+allKBs.forEach(kb => {
+  kb.documents.forEach(doc => {
+    (doc.sampleContent || []).forEach((content, i) => {
+      searchIndex.push({ kbId: kb.id, kbName: kb.name, kbScope: kb.scope, docId: doc.id, docName: doc.name, docIcon: doc.icon, content, chunkIdx: i+1 });
+    });
+  });
+});
+
+// chunk 预览数据
+const chunkPreviewData = [
+  { id:1, tokens:512, page:1, heading:'H1: 产品概述', type:'TEXT', content:'本文档旨在描述知识引擎的切片能力设计与产品规划。知识引擎作为企业级 RAG 系统的核心组件，负责将原始文档转化为可检索的向量化片段。高质量的切片是保证检索精度的基础...' },
+  { id:2, tokens:498, page:1, heading:'H2: 背景与现状', type:'TEXT', content:'当前知识库系统在处理长文档时存在显著的切片质量问题。现有的 500 token 硬编码切片策略无法适应不同文档类型的需求，导致合同条款被截断...' },
+  { id:3, tokens:31, page:2, heading:'', type:'IMAGE_CAPTION', content:'图 2-1 知识引擎系统架构图', isShort:true },
+  { id:4, tokens:521, page:2, heading:'H2: 技术方案', type:'TABLE', content:'| 策略 | 技术实现 | 适用场景 | Token成本 |\n| 标准模式 | HierarchicalSplitter | 通用文档 | 低 |\n| 自定义 | 分隔符 | 结构化 | 低 |...' },
+  { id:5, tokens:476, page:3, heading:'H2: 应用场景', type:'TEXT', content:'法律合规团队在使用标准切片策略时面临合同条款被截断的问题。推荐使用智能上下文模式配合 1024 token 大小和 20% 重叠率...' },
+];
+
+const problemChunks = [
+  { id:'chunk_0x1a2b', type:'short', tokens:31, source:'产品手册_2024.pdf', summary:'图 2-1 系统架构图' },
+  { id:'chunk_0x3c4d', type:'short', tokens:18, source:'SOP操作规范_v3.docx', summary:'注意事项：' },
+  { id:'chunk_0x5e6f', type:'duplicate', tokens:487, source:'合同模板_2024Q1.pdf', summary:'第三条 甲方应在...（与 chunk_0x7a8b 相似度 0.97）' },
+  { id:'chunk_0x9g0h', type:'short', tokens:43, source:'技术规范_API.md', summary:'返回值说明' },
+];
+
+// ============================
+// 工具函数
+// ============================
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
+  if (bytes < 1073741824) return (bytes/1048576).toFixed(1) + ' MB';
+  return (bytes/1073741824).toFixed(1) + ' GB';
+}
+function fileIcon(type) {
+  const m = {
+    excel: React.createElement(FileExcelOutlined, {style:{color:'#52c41a',fontSize:16}}),
+    pdf: React.createElement(FilePdfOutlined, {style:{color:'#ff4d4f',fontSize:16}}),
+    word: React.createElement(FileWordOutlined, {style:{color:'#1677ff',fontSize:16}}),
+    markdown: React.createElement(FileMarkdownOutlined, {style:{color:'#722ed1',fontSize:16}})
+  };
+  return m[type] || React.createElement(FileTextOutlined);
+}
+function highlightText(text, keyword) {
+  if (!keyword) return text;
+  const idx = text.toLowerCase().indexOf(keyword.toLowerCase());
+  if (idx === -1) return text;
+  return React.createElement('span', null,
+    text.slice(0, idx),
+    React.createElement('span', {className:'search-highlight'}, text.slice(idx, idx+keyword.length)),
+    text.slice(idx+keyword.length)
+  );
+}
+
+// ============================
+// TopNav
+// ============================
+function TopNav({ onGoHome }) {
+  const navItems = ['智能问答','数据接入','知识管理','主体建模','AI应用','项目中心','客户数据平台'];
+  return React.createElement('div',{className:'top-nav'},
+    React.createElement('div',{className:'logo'},
+      React.createElement('div',{className:'logo-icon'}, React.createElement(DatabaseOutlined,{style:{fontSize:14}})),
+      React.createElement('span',{className:'logo-text'},'火山引擎'),
+      React.createElement('span',{style:{color:'#86909c',fontSize:13,marginLeft:-4}},'企业知识引擎')
+    ),
+    React.createElement('div',{className:'nav-items'},
+      navItems.map((n,i) => React.createElement('div',{key:i,className:`nav-item ${n==='知识管理'?'active':''}`,onClick:()=>n==='知识管理'&&onGoHome()},
+        n, (n==='数据接入'||n==='知识管理')&&React.createElement(DownOutlined,{style:{fontSize:10,marginLeft:4}})
+      ))
+    ),
+    React.createElement('div',{className:'nav-right'},
+      React.createElement('div',{className:'project-sel'},'默认... / 验收测试项目1 ',React.createElement(DownOutlined,{style:{fontSize:10}})),
+      React.createElement(Badge,{dot:true}, React.createElement(Button,{type:'text',size:'small',icon:React.createElement(InfoCircleOutlined)})),
+      React.createElement('div',{style:{width:28,height:28,borderRadius:'50%',background:'#1677ff',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:600,cursor:'pointer'}},'A')
+    )
+  );
+}
+
+// ============================
+// Page 1: 知识管理首页（重新设计）
+// ============================
+function KBListPage({ onSelectKB, onGoChunkConfig }) {
+  const [scopeFilter, setScopeFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [searchText, setSearchText] = useState('');
+  const [searchMode, setSearchMode] = useState(false);
+  const [expandedRows, setExpandedRows] = useState([]);
+
+  // 统计数据
+  const stats = useMemo(() => {
+    const personal = allKBs.filter(k=>k.scope==='personal');
+    const pub = allKBs.filter(k=>k.scope==='public');
+    const totalDocs = allKBs.reduce((s,k)=>s+k.documents.length,0);
+    const totalChunks = allKBs.reduce((s,k)=>s+k.documents.reduce((ss,d)=>ss+d.chunks,0),0);
+    const totalSize = allKBs.reduce((s,k)=>s+k.documents.reduce((ss,d)=>ss+(d.sizeBytes||0),0),0);
+    return { total:allKBs.length, personal:personal.length, public:pub.length, totalDocs, totalChunks, totalSize };
+  }, []);
+
+  // 过滤
+  const filteredKBs = useMemo(() => {
+    return allKBs.filter(kb => {
+      if (scopeFilter === 'personal' && kb.scope !== 'personal') return false;
+      if (scopeFilter === 'public' && kb.scope !== 'public') return false;
+      if (typeFilter !== 'all' && kb.type !== typeFilter) return false;
+      if (searchText && !searchMode) {
+        const q = searchText.toLowerCase();
+        return kb.name.toLowerCase().includes(q) || kb.documents.some(d => d.name.toLowerCase().includes(q));
+      }
+      return true;
+    });
+  }, [scopeFilter, typeFilter, searchText, searchMode]);
+
+  // 搜索结果
+  const searchResults = useMemo(() => {
+    if (!searchText || !searchMode) return [];
+    const q = searchText.toLowerCase();
+    return searchIndex.filter(item =>
+      item.content.toLowerCase().includes(q) || item.docName.toLowerCase().includes(q) || item.kbName.toLowerCase().includes(q)
+    ).slice(0, 20);
+  }, [searchText, searchMode]);
+
+  const handleSearch = (value) => {
+    setSearchText(value);
+    setSearchMode(!!value && value.length > 0);
+  };
+
+  // KB 列表表格列
+  const kbColumns = [
+    {
+      title: '知识库名称',
+      dataIndex: 'name',
+      key: 'name',
+      render: (text, record) => React.createElement(Space, null,
+        record.scope === 'personal'
+          ? React.createElement(LockOutlined, {style:{color:'#faad14',fontSize:14}})
+          : React.createElement(GlobalOutlined, {style:{color:'#1677ff',fontSize:14}}),
+        React.createElement('a', {onClick:()=>onSelectKB(record), style:{fontWeight:500,fontSize:14}}, text)
+      )
+    },
+    {
+      title: '类型',
+      dataIndex: 'type',
+      key: 'type',
+      width: 120,
+      render: v => React.createElement(Tag, {color:v==='QA问答'?'orange':'blue',bordered:false}, v)
+    },
+    {
+      title: '归属',
+      dataIndex: 'scope',
+      key: 'scope',
+      width: 100,
+      render: (v,r) => v==='personal'
+        ? React.createElement(Tag,{icon:React.createElement(UserOutlined),bordered:false},'个人')
+        : React.createElement(Tag,{icon:React.createElement(TeamOutlined),color:'processing',bordered:false},'公共')
+    },
+    {
+      title: '文档数',
+      key: 'docCount',
+      width: 80,
+      sorter: (a,b) => a.documents.length - b.documents.length,
+      render: (_,r) => React.createElement(Text,{strong:true}, r.documents.length)
+    },
+    {
+      title: '切片总数',
+      key: 'chunkCount',
+      width: 100,
+      sorter: (a,b) => a.documents.reduce((s,d)=>s+d.chunks,0) - b.documents.reduce((s,d)=>s+d.chunks,0),
+      render: (_,r) => {
+        const total = r.documents.reduce((s,d) => s+d.chunks, 0);
+        return React.createElement(Text,null, total.toLocaleString());
+      }
+    },
+    {
+      title: '存储大小',
+      key: 'size',
+      width: 100,
+      sorter: (a,b) => a.documents.reduce((s,d)=>s+(d.sizeBytes||0),0) - b.documents.reduce((s,d)=>s+(d.sizeBytes||0),0),
+      render: (_,r) => formatSize(r.documents.reduce((s,d) => s+(d.sizeBytes||0), 0))
+    },
+    {
+      title: '最近更新',
+      dataIndex: 'updatedAt',
+      key: 'updatedAt',
+      width: 170,
+      sorter: (a,b) => a.updatedAt.localeCompare(b.updatedAt),
+      defaultSortOrder: 'descend',
+      render: v => React.createElement(Text,{type:'secondary',style:{fontSize:12}}, v)
+    },
+    {
+      title: '创建人',
+      dataIndex: 'owner',
+      key: 'owner',
+      width: 120,
+      render: v => React.createElement(Space,{size:4}, React.createElement(UserOutlined,{style:{fontSize:12,color:'#86909c'}}), React.createElement(Text,{type:'secondary'},v))
+    },
+    {
+      title: '操作',
+      key: 'action',
+      width: 120,
+      render: (_, record) => React.createElement(Space, {size:'small'},
+        React.createElement(Tooltip,{title:'查看详情'}, React.createElement(Button,{type:'link',size:'small',onClick:()=>onSelectKB(record)},'查看')),
+        React.createElement(Dropdown,{
+          menu:{items:[
+            {key:'edit',label:'编辑',icon:React.createElement(EditOutlined)},
+            {key:'copy',label:'复制',icon:React.createElement(CopyOutlined)},
+            {type:'divider'},
+            {key:'del',label:'删除',icon:React.createElement(DeleteOutlined),danger:true},
+          ]}
+        }, React.createElement(Button,{type:'text',size:'small',icon:React.createElement(MoreOutlined)}))
+      )
+    }
+  ];
+
+  // 展开行 — 显示文档列表
+  const docColumns = [
+    {
+      title: '文档名称',
+      dataIndex: 'name',
+      key: 'name',
+      render: (text, record) => React.createElement(Space, null, fileIcon(record.icon), React.createElement(Text,null,text))
+    },
+    { title: '大小', dataIndex: 'size', key: 'size', width: 100 },
+    { title: '切片数', dataIndex: 'chunks', key: 'chunks', width: 80 },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      key: 'status',
+      width: 100,
+      render: s => s==='success'
+        ? React.createElement(Tag,{icon:React.createElement(CheckCircleFilled),color:'success'},'成功')
+        : React.createElement(Tag,{icon:React.createElement(ClockCircleOutlined),color:'processing'},'处理中')
+    },
+    {
+      title: '检测',
+      dataIndex: 'detection',
+      key: 'detection',
+      width: 100,
+      render: v => v==='normal'?React.createElement(Tag,{color:'success',bordered:false},'正常'):v==='warning'?React.createElement(Tag,{color:'warning',bordered:false},'有风险'):React.createElement(Text,{type:'secondary'},'-')
+    },
+    { title: '有效期', dataIndex: 'expiry', key: 'expiry', width: 100, render:v=>React.createElement(Text,{type:'secondary',style:{fontSize:12}},v) },
+    {
+      title: '操作',
+      key: 'action',
+      width: 200,
+      render: (_,record) => React.createElement(Space,{size:4},
+        React.createElement(Button,{type:'link',size:'small',onClick:()=>onGoChunkConfig(record,'config')},'切片配置'),
+        React.createElement(Button,{type:'link',size:'small',onClick:()=>onGoChunkConfig(record,'preview')},'预览'),
+        React.createElement(Button,{type:'link',size:'small',onClick:()=>onGoChunkConfig(record,'quality')},'质量')
+      )
+    }
+  ];
+
+  const expandedRowRender = (record) => {
+    return React.createElement(Table, {
+      columns: docColumns,
+      dataSource: record.documents,
+      rowKey: 'id',
+      pagination: false,
+      size: 'small',
+      showHeader: true,
+      style: { margin: '0 0 0 32px' }
+    });
+  };
+
+  // 迷你趋势柱状图
+  const miniTrend = (data, color) => React.createElement('div',{className:'mini-trend'},
+    data.map((v,i)=>React.createElement('div',{key:i,className:'bar',style:{height:`${v}%`,background:color||'#1677ff'}}))
+  );
+
+  // 类型分布小环形图
+  const typeDist = React.createElement('div',{style:{display:'flex',alignItems:'center',gap:16}},
+    React.createElement('div',{className:'dist-ring',style:{background:`conic-gradient(#1677ff 0% ${(stats.total-1)/stats.total*100}%, #fa8c16 ${(stats.total-1)/stats.total*100}% 100%)`}},
+      React.createElement('div',{className:'dist-ring-inner'}, stats.total)
+    ),
+    React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:4}},
+      React.createElement(Space,{size:4}, React.createElement('div',{style:{width:8,height:8,borderRadius:'50%',background:'#1677ff'}}), React.createElement(Text,{style:{fontSize:12}},'通用内容 '+(stats.total-1))),
+      React.createElement(Space,{size:4}, React.createElement('div',{style:{width:8,height:8,borderRadius:'50%',background:'#fa8c16'}}), React.createElement(Text,{style:{fontSize:12}},'QA问答 1'))
+    )
+  );
+
+  return React.createElement('div', {className:'fade-in',style:{padding:'20px 24px',maxWidth:1400,margin:'0 auto'}},
+    // 页面标题
+    React.createElement(Flex,{justify:'space-between',align:'center',style:{marginBottom:20}},
+      React.createElement('div',null,
+        React.createElement(Title,{level:4,style:{margin:0}},'知识管理'),
+        React.createElement(Text,{type:'secondary',style:{fontSize:13}},'管理和检索您的知识资产，支持全文内容检索')
+      ),
+      React.createElement(Space,null,
+        React.createElement(Button,{icon:React.createElement(ReloadOutlined),onClick:()=>message.info('刷新')},'刷新'),
+        React.createElement(Button,{type:'primary',icon:React.createElement(PlusOutlined),onClick:()=>message.info('新增知识库 (原型演示)')},'新增知识库')
+      )
+    ),
+
+    // 资产概览统计卡片
+    React.createElement(Row,{gutter:16,style:{marginBottom:20}},
+      [
+        { label:'知识库总数', value:stats.total, icon:React.createElement(BookOutlined), iconBg:'#e8f3ff', iconColor:'#1677ff', trend:'+2', trendUp:true, sub:`个人 ${stats.personal} / 公共 ${stats.public}`, trendData:[40,55,45,70,60,85,80], bgIcon:React.createElement(BookOutlined) },
+        { label:'文档总数', value:stats.totalDocs, icon:React.createElement(FileTextOutlined), iconBg:'#f0f5ff', iconColor:'#2f54eb', trend:'+8', trendUp:true, sub:'本周新增 8 篇', trendData:[30,45,50,40,65,70,80], bgIcon:React.createElement(FileTextOutlined) },
+        { label:'切片总数', value:stats.totalChunks.toLocaleString(), icon:React.createElement(PieChartOutlined), iconBg:'#f6ffed', iconColor:'#52c41a', trend:'+1,247', trendUp:true, sub:'过短率 3.2%', trendData:[50,55,60,58,72,75,90], bgIcon:React.createElement(PieChartOutlined) },
+        { label:'总存储', value:formatSize(stats.totalSize), icon:React.createElement(HddOutlined), iconBg:'#fff7e6', iconColor:'#fa8c16', trend:'+120MB', trendUp:true, sub:'配额使用 12%', trendData:[20,35,30,45,50,55,60], bgIcon:React.createElement(HddOutlined) },
+      ].map((s,i)=>
+        React.createElement(Col,{span:6,key:i},
+          React.createElement('div',{className:'stat-card'},
+            React.createElement(Flex,{justify:'space-between',align:'flex-start'},
+              React.createElement('div',null,
+                React.createElement('div',{className:'stat-icon',style:{background:s.iconBg,color:s.iconColor}}, s.icon),
+                React.createElement('div',{className:'stat-value'}, s.value),
+                React.createElement('div',{className:'stat-label'}, s.label),
+                React.createElement('div',{className:'stat-trend'},
+                  React.createElement(Tag,{color:s.trendUp?'success':'error',bordered:false,style:{fontSize:11}},
+                    s.trendUp?React.createElement(RiseOutlined):React.createElement(FallOutlined),' ',s.trend
+                  ),
+                  React.createElement(Text,{type:'secondary',style:{fontSize:11}}, s.sub)
+                )
+              ),
+              miniTrend(s.trendData, s.iconColor)
+            ),
+            React.createElement('div',{className:'stat-bg'}, s.bgIcon)
+          )
+        )
+      )
+    ),
+
+    // 补充统计行
+    React.createElement(Row,{gutter:16,style:{marginBottom:20}},
+      React.createElement(Col,{span:8},
+        React.createElement(Card,{size:'small',style:{borderRadius:12}},
+          React.createElement(Flex,{justify:'space-between',align:'center'},
+            React.createElement('div',null,
+              React.createElement(Text,{type:'secondary',style:{fontSize:12,display:'block'}},'知识库类型分布'),
+            ),
+            typeDist
+          )
+        )
+      ),
+      React.createElement(Col,{span:8},
+        React.createElement(Card,{size:'small',style:{borderRadius:12}},
+          React.createElement(Flex,{justify:'space-between',align:'center'},
+            React.createElement('div',null,
+              React.createElement(Text,{type:'secondary',style:{fontSize:12,display:'block',marginBottom:4}},'文档格式分布'),
+              React.createElement(Space,{size:4,wrap:true},
+                React.createElement(Tag,{icon:React.createElement(FileExcelOutlined),bordered:false,color:'success'},'Excel 6'),
+                React.createElement(Tag,{icon:React.createElement(FilePdfOutlined),bordered:false,color:'error'},'PDF 5'),
+                React.createElement(Tag,{icon:React.createElement(FileWordOutlined),bordered:false,color:'processing'},'Word 4'),
+                React.createElement(Tag,{icon:React.createElement(FileMarkdownOutlined),bordered:false,color:'purple'},'MD 6')
+              )
+            )
+          )
+        )
+      ),
+      React.createElement(Col,{span:8},
+        React.createElement(Card,{size:'small',style:{borderRadius:12}},
+          React.createElement(Flex,{justify:'space-between',align:'center'},
+            React.createElement('div',null,
+              React.createElement(Text,{type:'secondary',style:{fontSize:12,display:'block',marginBottom:4}},'处理状态'),
+              React.createElement(Space,{size:8},
+                React.createElement(Statistic,{title:React.createElement(Text,{style:{fontSize:11}},'成功'),value:stats.totalDocs,valueStyle:{fontSize:20,color:'#52c41a'}}),
+                React.createElement(Statistic,{title:React.createElement(Text,{style:{fontSize:11}},'处理中'),value:1,valueStyle:{fontSize:20,color:'#1677ff'}}),
+                React.createElement(Statistic,{title:React.createElement(Text,{style:{fontSize:11}},'异常'),value:0,valueStyle:{fontSize:20,color:'#ff4d4f'}})
+              )
+            )
+          )
+        )
+      )
+    ),
+
+    // 搜索区
+    React.createElement('div',{className:'search-section'},
+      React.createElement(Input.Search,{
+        placeholder:'搜索知识内容、文档名称、知识库名称...',
+        size:'large',
+        enterButton: React.createElement(Space,null,React.createElement(FileSearchOutlined),'全文检索'),
+        prefix: React.createElement(SearchOutlined,{style:{color:'#bfbfbf'}}),
+        allowClear: true,
+        onSearch: handleSearch,
+        onChange: e => { if(!e.target.value) { setSearchText(''); setSearchMode(false); } },
+        style: { marginBottom: searchMode ? 16 : 0 }
+      }),
+
+      // 搜索结果
+      searchMode && React.createElement('div',{className:'fade-in'},
+        React.createElement(Flex,{justify:'space-between',align:'center',style:{marginBottom:12}},
+          React.createElement(Space,null,
+            React.createElement(Text,{strong:true},'搜索结果'),
+            React.createElement(Tag,{color:'blue'}, searchResults.length, ' 条匹配'),
+            React.createElement(Text,{type:'secondary',style:{fontSize:12}},
+              '分布在 ', [...new Set(searchResults.map(r=>r.kbId))].length, ' 个知识库中'
+            )
+          ),
+          React.createElement(Button,{type:'link',onClick:()=>{setSearchMode(false);setSearchText('')}},'清除搜索')
+        ),
+        searchResults.length === 0
+          ? React.createElement(Empty,{description:'未找到匹配的知识内容'})
+          : searchResults.map((r,i) =>
+            React.createElement('div',{key:i,className:'search-result-item',onClick:()=>{
+              const kb = allKBs.find(k=>k.id===r.kbId);
+              if(kb) onSelectKB(kb);
+            }},
+              React.createElement(Flex,{justify:'space-between',align:'flex-start'},
+                React.createElement('div',{style:{flex:1}},
+                  React.createElement(Space,{style:{marginBottom:6}},
+                    fileIcon(r.docIcon),
+                    React.createElement(Text,{strong:true,style:{fontSize:13}}, r.docName),
+                    React.createElement(Text,{type:'secondary',style:{fontSize:12}}, '> Chunk #',r.chunkIdx)
+                  ),
+                  React.createElement('div',{style:{fontSize:13,color:'#4e5969',lineHeight:1.8,marginBottom:8}},
+                    highlightText(r.content, searchText)
+                  ),
+                  React.createElement(Space,{size:12},
+                    React.createElement(Space,{size:4},
+                      r.kbScope==='personal'
+                        ? React.createElement(LockOutlined,{style:{fontSize:11,color:'#faad14'}})
+                        : React.createElement(GlobalOutlined,{style:{fontSize:11,color:'#1677ff'}}),
+                      React.createElement(Text,{type:'secondary',style:{fontSize:12}},'知识库：',r.kbName)
+                    )
+                  )
+                ),
+                React.createElement(Tag,{color:'blue',bordered:false,style:{marginTop:4}}, '相关度 ',Math.floor(95-i*5),'%')
+              )
+            )
+          )
+      )
+    ),
+
+    // 知识库列表（非搜索模式才显示）
+    !searchMode && React.createElement('div',{className:'kb-table-wrap'},
+      React.createElement(Flex,{style:{padding:'12px 16px',borderBottom:'1px solid #f0f0f0'},justify:'space-between',align:'center'},
+        React.createElement(Segmented,{
+          value: scopeFilter,
+          onChange: setScopeFilter,
+          options:[
+            {label:React.createElement(Space,{size:4},'全部',React.createElement(Badge,{count:stats.total,style:{backgroundColor:'#e8e8e8',color:'#595959'},size:'small'})),value:'all'},
+            {label:React.createElement(Space,{size:4},React.createElement(LockOutlined),'个人知识库',React.createElement(Badge,{count:stats.personal,style:{backgroundColor:'#fff7e6',color:'#fa8c16'},size:'small'})),value:'personal'},
+            {label:React.createElement(Space,{size:4},React.createElement(GlobalOutlined),'公共知识库',React.createElement(Badge,{count:stats.public,style:{backgroundColor:'#e8f3ff',color:'#1677ff'},size:'small'})),value:'public'},
+          ]
+        }),
+        React.createElement(Space,null,
+          React.createElement(Select,{
+            value:typeFilter,onChange:setTypeFilter,style:{width:130},size:'small',
+            options:[{value:'all',label:'所有类型'},{value:'通用内容',label:'通用内容'},{value:'QA问答',label:'QA问答'}]
+          }),
+          React.createElement(Input,{placeholder:'筛选知识库',prefix:React.createElement(SearchOutlined),size:'small',style:{width:180},allowClear:true,
+            onChange:e=>setSearchText(e.target.value)
+          })
+        )
+      ),
+      React.createElement(Table,{
+        columns: kbColumns,
+        dataSource: filteredKBs,
+        rowKey: 'id',
+        size: 'middle',
+        expandable: {
+          expandedRowRender,
+          expandedRowKeys: expandedRows,
+          onExpand: (expanded, record) => {
+            setExpandedRows(expanded ? [...expandedRows, record.id] : expandedRows.filter(k=>k!==record.id));
+          }
+        },
+        pagination: { pageSize:20, showSizeChanger:true, showTotal:t=>`共 ${t} 个知识库`, size:'small' }
+      })
+    )
+  );
+}
+
+// ============================
+// Page 2: 知识库详情
+// ============================
+function KBDetailPage({ kb, onBack, onGoChunkConfig }) {
+  const [activeTab, setActiveTab] = useState('manage');
+  const [activeFolder, setActiveFolder] = useState('all');
+  const [importVisible, setImportVisible] = useState(false);
+
+  const columns = [
+    { title:'知识数据名称', dataIndex:'name', key:'name',
+      render:(text,r)=>React.createElement(Space,null,fileIcon(r.icon),React.createElement('a',{onClick:()=>onGoChunkConfig(r,'preview'),style:{color:'#1677ff'}},text))
+    },
+    { title:'大小', dataIndex:'size', key:'size', width:100 },
+    { title:'分段数量', dataIndex:'chunks', key:'chunks', width:100 },
+    { title:'处理状态', dataIndex:'status', key:'status', width:120,
+      render:s=>s==='success'?React.createElement(Space,null,React.createElement(CheckCircleFilled,{style:{color:'#52c41a'}}),'处理成功'):React.createElement(Space,null,React.createElement(ClockCircleOutlined,{style:{color:'#1677ff'}}),'处理中')
+    },
+    { title:'检测结果', dataIndex:'detection', key:'detection', width:100,
+      render:v=>v==='normal'?React.createElement(Tag,{color:'success'},'检测正常'):v==='warning'?React.createElement(Tag,{color:'warning'},'有风险'):React.createElement(Text,{type:'secondary'},'-')
+    },
+    { title:'知识标签', dataIndex:'tags', key:'tags', width:100, render:v=>v==='-'?React.createElement(Text,{type:'secondary'},'-'):React.createElement(Tag,null,v) },
+    { title:'知识分类', dataIndex:'category', key:'category', width:100, render:v=>v==='-'?React.createElement(Text,{type:'secondary'},'-'):v },
+    { title:'有效期', dataIndex:'expiry', key:'expiry', width:100 },
+    { title:'操作', key:'action', width:220,
+      render:(_,r)=>React.createElement(Space,{size:'small'},
+        React.createElement(Button,{type:'link',size:'small',onClick:()=>message.info('知识标签配置')},'知识标签配置'),
+        React.createElement(Button,{type:'link',size:'small',onClick:()=>message.info('有效期配置')},'有效期配置'),
+        React.createElement(Dropdown,{menu:{items:[
+          {key:'chunk',label:'切片配置',icon:React.createElement(SettingOutlined),onClick:()=>onGoChunkConfig(r,'config')},
+          {key:'preview',label:'切片预览',icon:React.createElement(EyeOutlined),onClick:()=>onGoChunkConfig(r,'preview')},
+          {key:'quality',label:'质量看板',icon:React.createElement(BarChartOutlined),onClick:()=>onGoChunkConfig(r,'quality')},
+          {type:'divider'},
+          {key:'del',label:'删除',icon:React.createElement(DeleteOutlined),danger:true},
+        ]}}, React.createElement(Button,{type:'text',size:'small',icon:React.createElement(MoreOutlined)}))
+      )
+    }
+  ];
+
+  const folders = [
+    {key:'all',label:'全部文件',icon:React.createElement(FolderOpenOutlined)},
+    {key:'test',label:'测试',icon:React.createElement(FolderOutlined,{style:{color:'#1677ff'}})}
+  ];
+
+  return React.createElement('div',{className:'fade-in'},
+    React.createElement('div',{className:'detail-header'},
+      React.createElement(Space,{align:'center',style:{marginBottom:8}},
+        React.createElement(Button,{type:'text',icon:React.createElement(ArrowLeftOutlined),onClick:onBack}),
+        React.createElement(Title,{level:4,style:{margin:0}},kb.name),
+        kb.scope==='personal'
+          ? React.createElement(Tag,{icon:React.createElement(LockOutlined),bordered:false},'个人')
+          : React.createElement(Tag,{icon:React.createElement(TeamOutlined),color:'processing',bordered:false},'公共'),
+        React.createElement('div',{style:{position:'absolute',right:24}}, React.createElement(Button,{icon:React.createElement(EditOutlined)},'编辑基本信息'))
+      ),
+      React.createElement('div',{className:'detail-meta'},
+        React.createElement('span',null,'创建人：',kb.owner),
+        React.createElement('span',null,'创建时间：',kb.createdAt),
+        React.createElement('span',null,'更新时间：',kb.updatedAt),
+        React.createElement('span',null,'文档数：',kb.documents.length)
+      )
+    ),
+    React.createElement(Tabs,{activeKey:activeTab,onChange:setActiveTab,style:{background:'#fff',paddingLeft:24},size:'middle',
+      items:[{key:'manage',label:'知识管理'},{key:'recall',label:'知识召回测试'},{key:'category',label:'知识分类'},{key:'log',label:'运行记录'},{key:'download',label:'下载记录'}]
+    }),
+    activeTab==='manage'
+      ? React.createElement('div',{className:'detail-body'},
+          React.createElement('div',{className:'sidebar'},
+            React.createElement('div',{className:'sidebar-title'}, React.createElement('span',null,'分组目录'), React.createElement(Button,{type:'text',size:'small',icon:React.createElement(PlusOutlined,{style:{color:'#1677ff'}})})),
+            React.createElement(Input,{placeholder:'文件夹名称',size:'small',prefix:React.createElement(SearchOutlined),style:{marginBottom:8}}),
+            folders.map(f=>React.createElement('div',{key:f.key,className:`folder-item ${activeFolder===f.key?'active':''}`,onClick:()=>setActiveFolder(f.key)},f.icon,React.createElement('span',null,f.label)))
+          ),
+          React.createElement('div',{className:'content-area'},
+            React.createElement(Flex,{gap:12,style:{marginBottom:12}},
+              React.createElement(Input,{placeholder:'知识名称',style:{width:200},prefix:React.createElement(SearchOutlined)}),
+              React.createElement(Select,{placeholder:'请选择分类',style:{width:160},allowClear:true,options:[{value:'tech',label:'技术文档'},{value:'manual',label:'操作手册'}]}),
+              React.createElement('div',{style:{flex:1}}),
+              React.createElement(Button,{icon:React.createElement(ReloadOutlined)},'刷新'),
+              React.createElement(Button,{type:'primary',icon:React.createElement(PlusOutlined),onClick:()=>setImportVisible(true)},'导入知识')
+            ),
+            React.createElement(Table,{columns,dataSource:kb.documents,rowKey:'id',size:'middle',rowSelection:{type:'checkbox'},
+              pagination:{pageSize:50,showSizeChanger:true,showTotal:t=>`共 ${t} 条`},
+              style:{background:'#fff',borderRadius:8}
+            })
+          )
+        )
+      : React.createElement('div',{style:{padding:48,textAlign:'center'}}, React.createElement(Empty,{description:'功能开发中 (原型演示)'})),
+
+    React.createElement(Modal,{title:React.createElement(Space,null,React.createElement(CloudUploadOutlined),'导入知识'),open:importVisible,onCancel:()=>setImportVisible(false),width:640,
+      footer:[React.createElement(Button,{key:'c',onClick:()=>setImportVisible(false)},'取消'),React.createElement(Button,{key:'i',type:'primary',onClick:()=>{setImportVisible(false);onGoChunkConfig(kb.documents[0],'config')}},'下一步：配置切片')]
+    },
+      React.createElement(Alert,{message:'支持上传 PDF、Word、Excel、Markdown、TXT 等格式，单文件最大 100MB',type:'info',showIcon:true,style:{marginBottom:16}}),
+      React.createElement('div',{style:{border:'2px dashed #d9d9d9',borderRadius:8,padding:40,textAlign:'center',background:'#fafafa',cursor:'pointer'},
+        onMouseEnter:e=>{e.currentTarget.style.borderColor='#1677ff';e.currentTarget.style.background='#f0f7ff'},
+        onMouseLeave:e=>{e.currentTarget.style.borderColor='#d9d9d9';e.currentTarget.style.background='#fafafa'}
+      },
+        React.createElement(CloudUploadOutlined,{style:{fontSize:48,color:'#1677ff',marginBottom:12}}),
+        React.createElement('div',null, React.createElement(Text,{strong:true},'点击或拖拽文件到此区域上传')),
+        React.createElement(Text,{type:'secondary',style:{fontSize:13}},'支持批量上传')
+      )
+    )
+  );
+}
+
+// ============================
+// Page 3: 切片配置
+// ============================
+function ChunkConfigPage({ doc, initialTab, onBack }) {
+  const [activeTab, setActiveTab] = useState(initialTab||'config');
+  const [strategy, setStrategy] = useState('default');
+  const [tokenSize, setTokenSize] = useState(512);
+  const [overlap, setOverlap] = useState('0');
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [advOpts, setAdvOpts] = useState({rmWhite:true,rmImg:true,extImg:false,extTbl:false,genQA:false});
+
+  const strategies = [
+    {key:'default',name:'标准模式',desc:'通用文档',icon:React.createElement(AppstoreOutlined),cost:'低成本',cc:'success'},
+    {key:'custom',name:'自定义模式',desc:'结构化文本/代码',icon:React.createElement(ScissorOutlined),cost:'低成本',cc:'success'},
+    {key:'ai',name:'语义 AI 模式',desc:'报告/学术论文',icon:React.createElement(RobotOutlined),cost:'中等成本',cc:'warning'},
+    {key:'context_aware',name:'智能上下文',desc:'高价值文档',icon:React.createElement(BulbOutlined),cost:'较高成本',cc:'orange'},
+    {key:'contextual',name:'Contextual 增强',desc:'年报/混排内容',icon:React.createElement(ThunderboltOutlined),cost:'高成本',cc:'error',rec:true},
+  ];
+
+  function ConfigTab() {
+    return React.createElement('div',{className:'fade-in'},
+      React.createElement('div',{style:{marginBottom:24}},
+        React.createElement(Space,{align:'center',style:{marginBottom:8}},
+          React.createElement('div',{style:{width:24,height:24,borderRadius:'50%',background:'#1677ff',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700}},'1'),
+          React.createElement(Title,{level:5,style:{margin:0}},'选择切片策略')
+        ),
+        React.createElement(Text,{type:'secondary',style:{display:'block',marginLeft:32,marginBottom:16,fontSize:13}},'不同策略适用于不同文档类型，系统将根据文档自动推荐'),
+        React.createElement('div',{className:'strategy-grid'},
+          strategies.map(s=>React.createElement('div',{key:s.key,className:`strategy-card ${strategy===s.key?'selected':''}`,onClick:()=>setStrategy(s.key)},
+            React.createElement('div',{className:'s-icon'},s.icon),
+            React.createElement('div',{className:'s-name'},s.name),
+            React.createElement('div',{className:'s-desc'},s.desc),
+            React.createElement(Space,{size:4,wrap:true,style:{justifyContent:'center'}},
+              React.createElement(Tag,{color:s.cc,bordered:false},s.cost),
+              s.rec&&React.createElement(Tag,{color:'blue',bordered:false},React.createElement(StarOutlined),' 推荐')
+            )
+          ))
+        )
+      ),
+      React.createElement(Card,{title:React.createElement(Space,null,
+        React.createElement('div',{style:{width:24,height:24,borderRadius:'50%',background:'#1677ff',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700}},'2'),
+        '参数配置', React.createElement(Tag,{color:'blue'},strategies.find(s=>s.key===strategy)?.name)),
+        style:{marginBottom:24,borderRadius:12}},
+        React.createElement('div',{style:{marginBottom:28}},
+          React.createElement(Flex,{justify:'space-between',align:'center',style:{marginBottom:8}},
+            React.createElement(Text,{strong:true},'Chunk 大小（maxToken）'),
+            React.createElement(Space,null,
+              React.createElement(Text,{strong:true,style:{color:'#1677ff',fontSize:18}},tokenSize),
+              React.createElement(Text,{type:'secondary'},'tokens'),
+              React.createElement(Tag,null,'≈ ',(tokenSize*3).toLocaleString(),' 字')
+            )
+          ),
+          React.createElement(Slider,{min:256,max:1024,step:null,marks:{256:'256',512:'512',1024:'1024'},value:tokenSize,onChange:setTokenSize,tooltip:{formatter:v=>v+' tokens'}})
+        ),
+        React.createElement('div',{style:{marginBottom:24}},
+          React.createElement(Text,{strong:true,style:{display:'block',marginBottom:8}},'重叠率（Overlap）'),
+          React.createElement(Radio.Group,{value:overlap,onChange:e=>setOverlap(e.target.value)},
+            React.createElement(Radio,{value:'0'},'不重叠（0%）'),
+            React.createElement(Radio,{value:'10'},'轻度重叠（10%）'),
+            React.createElement(Radio,{value:'20'},React.createElement(Space,null,'标准重叠（20%）',React.createElement(Tag,{color:'blue',bordered:false},'推荐')))
+          ),
+          React.createElement(Text,{type:'secondary',style:{display:'block',marginTop:8,fontSize:12}},'重叠可防止语境在切片边界断裂，提升跨片段检索召回率约 +10%')
+        ),
+        strategy==='custom'&&React.createElement('div',{className:'fade-in',style:{marginBottom:24}},
+          React.createElement(Text,{strong:true,style:{display:'block',marginBottom:8}},'自定义分隔符'),
+          React.createElement(Input,{placeholder:'例如：## 或 \\n\\n 或 ====',style:{maxWidth:400}})
+        ),
+        strategy==='contextual'&&React.createElement(Alert,{className:'fade-in',message:'Contextual 嵌入增强（Anthropic 方案）',description:'系统将为每个 Chunk 自动生成约 100 token 的上下文摘要前缀，检索隔阈率降低 35~67%。',type:'info',showIcon:true,icon:React.createElement(ThunderboltOutlined),style:{marginBottom:24}}),
+        strategy==='context_aware'&&React.createElement(Alert,{className:'fade-in',message:'智能上下文模式 — 额外 LLM 调用',description:'此模式使用 LLM 理解文档结构后再切片，每个文档消耗额外 500~2000 tokens。',type:'warning',showIcon:true,icon:React.createElement(BulbOutlined),style:{marginBottom:24}}),
+        React.createElement(Alert,{message:'格式感知推荐',type:'info',showIcon:true,icon:React.createElement(BulbOutlined),
+          description:React.createElement(Row,{gutter:12,style:{marginTop:8}},
+            [{l:'PDF 年报/长文档',v:'智能上下文 · 1024 tokens'},{l:'Markdown / Wiki',v:'语义 AI · 512 tokens'},{l:'Excel / CSV',v:'标准模式 · 256 tokens'}].map((x,i)=>
+              React.createElement(Col,{span:8,key:i},React.createElement(Card,{size:'small',style:{borderRadius:8}},
+                React.createElement(Text,{strong:true,style:{display:'block',fontSize:13}},x.l),React.createElement(Text,{type:'secondary',style:{fontSize:12}},x.v)
+              ))
+            )
+          )
+        })
+      ),
+      React.createElement(Card,{style:{marginBottom:24,borderRadius:12},bodyStyle:{padding:advancedOpen?24:0},
+        title:React.createElement('div',{onClick:()=>setAdvancedOpen(!advancedOpen),style:{cursor:'pointer',display:'flex',alignItems:'center',gap:8}},
+          React.createElement('div',{style:{width:24,height:24,borderRadius:'50%',background:'#8c8c8c',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700}},'3'),
+          '高级选项', React.createElement(Text,{type:'secondary',style:{fontSize:12}},'（点击展开）')
+        ),
+        extra:React.createElement(Button,{type:'text',icon:advancedOpen?React.createElement(UpOutlined):React.createElement(DownOutlined),onClick:()=>setAdvancedOpen(!advancedOpen)})
+      },
+        advancedOpen&&React.createElement(Row,{gutter:[24,16],className:'fade-in'},
+          [{k:'rmWhite',l:'去除空白字符',d:'移除多余空格和换行'},{k:'rmImg',l:'去除图片 URL',d:'过滤图片链接'},{k:'extImg',l:'图片内容提取',d:'识别图片文字'},{k:'extTbl',l:'表格内容提取',d:'转为结构化文本'}].map(o=>
+            React.createElement(Col,{span:12,key:o.k},React.createElement(Flex,{justify:'space-between',align:'center'},
+              React.createElement('div',null,React.createElement(Text,{strong:true},o.l),React.createElement('br'),React.createElement(Text,{type:'secondary',style:{fontSize:12}},o.d)),
+              React.createElement(Switch,{checked:advOpts[o.k],onChange:v=>setAdvOpts({...advOpts,[o.k]:v})})
+            ))
+          ),
+          React.createElement(Col,{span:24},React.createElement(Flex,{justify:'space-between',align:'center'},
+            React.createElement('div',null,React.createElement(Space,null,React.createElement(Text,{strong:true},'生成原子问题'),React.createElement(Tag,{color:'orange',bordered:false},'实验性')),React.createElement('br'),React.createElement(Text,{type:'secondary',style:{fontSize:12}},'为每个 Chunk 生成 3~5 个 QA 对')),
+            React.createElement(Switch,{checked:advOpts.genQA,onChange:v=>setAdvOpts({...advOpts,genQA:v})})
+          ))
+        )
+      ),
+      React.createElement(Flex,{justify:'space-between'},
+        React.createElement(Button,{type:'text',icon:React.createElement(ReloadOutlined)},'重置为默认'),
+        React.createElement(Space,null,
+          React.createElement(Button,null,'保存配置'),
+          React.createElement(Button,{type:'primary',icon:React.createElement(EyeOutlined),onClick:()=>setActiveTab('preview')},'预览切片效果 ',React.createElement(RightOutlined))
+        )
+      )
+    );
+  }
+
+  function PreviewTab() {
+    return React.createElement('div',{className:'fade-in'},
+      React.createElement(Row,{gutter:16,style:{marginBottom:20}},
+        [{l:'总 Chunk 数',v:23,c:'#1d2129'},{l:'平均 Token',v:487,c:'#1677ff'},{l:'过短 Chunk',v:2,c:'#faad14'},{l:'过短占比',v:'8.7%',c:'#52c41a'}].map((s,i)=>
+          React.createElement(Col,{span:6,key:i},React.createElement(Card,{size:'small',style:{textAlign:'center',borderRadius:8}},
+            React.createElement('div',{style:{fontSize:28,fontWeight:700,color:s.c}},s.v),
+            React.createElement(Text,{type:'secondary',style:{fontSize:12}},s.l)
+          ))
+        )
+      ),
+      React.createElement(Flex,{justify:'space-between',align:'center',style:{marginBottom:16}},
+        React.createElement('div',null,React.createElement(Title,{level:5,style:{margin:0}},'切片预览'),React.createElement(Text,{type:'secondary',style:{fontSize:12}},'展示前 5 个 Chunk（不入库）')),
+        React.createElement(Space,null,React.createElement(Button,{onClick:()=>setActiveTab('config')},'调整参数'),React.createElement(Button,{type:'primary',onClick:()=>{message.success('已确认入库');onBack()}},'确认入库'))
+      ),
+      chunkPreviewData.map(c=>React.createElement('div',{key:c.id,className:`chunk-item ${c.isShort?'warning':''}`},
+        React.createElement(Flex,{justify:'space-between',align:'flex-start',style:{marginBottom:10}},
+          React.createElement(Space,{size:4,wrap:true},
+            React.createElement(Text,{strong:true,type:'secondary'},'#',c.id),
+            c.isShort?React.createElement(Tag,{color:'error',icon:React.createElement(ExclamationCircleFilled)},c.tokens,' tokens — 过短'):React.createElement(Tag,{color:'blue'},c.tokens,' tokens'),
+            React.createElement(Tag,null,'第 ',c.page,' 页'),
+            c.heading&&React.createElement(Tag,{color:'purple'},c.heading),
+            React.createElement(Tag,{color:c.type==='TABLE'?'green':c.type==='IMAGE_CAPTION'?'orange':'default'},c.type)
+          ),
+          c.isShort?React.createElement(Space,{size:4},React.createElement(Button,{size:'small',danger:true,type:'text',icon:React.createElement(DeleteOutlined)},'删除'),React.createElement(Button,{size:'small',type:'text',icon:React.createElement(MergeCellsOutlined)},'合并')):React.createElement(Button,{size:'small',type:'link'},'展开全文')
+        ),
+        React.createElement('div',{className:'chunk-content'},c.content),
+        c.isShort&&React.createElement(Alert,{message:'此 Chunk 过短，建议合并或删除',type:'error',showIcon:true,banner:true,style:{marginTop:8,borderRadius:6}})
+      )),
+      React.createElement(Text,{type:'secondary',style:{display:'block',textAlign:'center',marginTop:12,fontSize:12}},'仅展示前 5 个 Chunk，共 23 个')
+    );
+  }
+
+  function QualityTab() {
+    const histData = [
+      {r:'0-50',c:154,cl:'#ff4d4f',p:15},{r:'50-100',c:289,cl:'#bae0ff',p:28},{r:'100-200',c:412,cl:'#91caff',p:40},
+      {r:'200-300',c:623,cl:'#69b1ff',p:61},{r:'300-400',c:891,cl:'#4096ff',p:87},{r:'400-512',c:1024,cl:'#1677ff',p:100},
+      {r:'512-600',c:756,cl:'#4096ff',p:74},{r:'600-800',c:421,cl:'#91caff',p:41},{r:'800+',c:183,cl:'#bae0ff',p:18}
+    ];
+    const qCols = [
+      {title:'Chunk ID',dataIndex:'id',key:'id',render:v=>React.createElement(Text,{code:true,style:{fontSize:12}},v)},
+      {title:'类型',dataIndex:'type',key:'type',render:v=>v==='short'?React.createElement(Tag,{color:'error'},'过短'):React.createElement(Tag,{color:'warning'},'重复')},
+      {title:'Token数',dataIndex:'tokens',key:'tokens',render:(v,r)=>React.createElement(Text,{strong:r.type==='short',type:r.type==='short'?'danger':undefined},v)},
+      {title:'来源',dataIndex:'source',key:'source',render:v=>React.createElement(Text,{type:'secondary',style:{fontSize:12}},v)},
+      {title:'摘要',dataIndex:'summary',key:'summary',render:v=>React.createElement(Text,{style:{fontSize:12}},v)},
+      {title:'操作',key:'action',render:(_,r)=>React.createElement(Space,{size:'small'},
+        React.createElement(Button,{type:'link',size:'small'},'查看'),
+        r.type==='duplicate'?React.createElement(Button,{type:'link',size:'small',style:{color:'#faad14'}},'保留最新'):React.createElement(Button,{type:'link',size:'small'},'合并'),
+        React.createElement(Button,{type:'link',size:'small',danger:true},'删除')
+      )}
+    ];
+    return React.createElement('div',{className:'fade-in'},
+      React.createElement(Row,{gutter:16,style:{marginBottom:20}},
+        [{l:'总 Chunk 数',v:'4,823',e:'↑ 127',st:React.createElement(Tag,{color:'success',bordered:false},'正常')},
+         {l:'平均 Token',v:487,e:'目标 256~512',st:React.createElement(Tag,{color:'success',bordered:false},'良好'),vc:'#1677ff'},
+         {l:'过短占比',v:'3.2%',e:'共 154 个',st:React.createElement(Tag,{color:'warning',bordered:false},'注意'),vc:'#faad14'},
+         {l:'重复 Chunk',v:12,e:'相似度 > 0.95',st:React.createElement(Tag,{color:'error',bordered:false},'需处理'),vc:'#ff4d4f'}
+        ].map((s,i)=>React.createElement(Col,{span:6,key:i},React.createElement(Card,{size:'small',style:{borderRadius:8}},
+          React.createElement(Flex,{justify:'space-between',style:{marginBottom:4}},React.createElement(Text,{type:'secondary',style:{fontSize:12}},s.l),s.st),
+          React.createElement('div',{style:{fontSize:30,fontWeight:700,color:s.vc||'#1d2129'}},s.v),
+          React.createElement(Text,{type:'secondary',style:{fontSize:12}},s.e)
+        )))
+      ),
+      React.createElement(Row,{gutter:16,style:{marginBottom:20}},
+        React.createElement(Col,{span:14},React.createElement(Card,{title:'Chunk 长度分布',extra:React.createElement(Text,{type:'secondary',style:{fontSize:12}},'区间：50 tokens'),style:{borderRadius:8,height:'100%'}},
+          React.createElement('div',{style:{display:'flex',alignItems:'flex-end',gap:6,height:160,padding:'0 8px'}},
+            histData.map((b,i)=>React.createElement('div',{key:i,style:{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:4}},
+              React.createElement(Text,{style:{fontSize:10,color:b.cl==='#ff4d4f'?'#ff4d4f':'#8c8c8c',fontWeight:b.cl==='#ff4d4f'?700:400}},b.c),
+              React.createElement('div',{className:'histogram-bar',style:{width:'100%',height:b.p+'%',background:b.cl,minHeight:4}}),
+              React.createElement(Text,{type:'secondary',style:{fontSize:10}},b.r)
+            ))
+          )
+        )),
+        React.createElement(Col,{span:10},React.createElement(Card,{title:'整体质量评分',style:{borderRadius:8,height:'100%'}},
+          React.createElement('div',{style:{textAlign:'center',marginBottom:16}},
+            React.createElement('div',{className:'quality-ring'},React.createElement('div',{className:'quality-inner'},
+              React.createElement('div',{style:{fontSize:36,fontWeight:700,color:'#1677ff'}},'82'),
+              React.createElement(Text,{type:'secondary'},'/ 100')
+            )),
+            React.createElement(Tag,{color:'blue',style:{marginTop:8}},'良好')
+          ),
+          React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:10}},
+            [{l:'长度分布',v:88,c:'#52c41a'},{l:'内容完整性',v:79,c:'#1677ff'},{l:'重复率',v:74,c:'#faad14'}].map((x,i)=>
+              React.createElement(Flex,{key:i,align:'center',gap:8},
+                React.createElement(Text,{type:'secondary',style:{fontSize:12,width:70,flexShrink:0}},x.l),
+                React.createElement(Progress,{percent:x.v,strokeColor:x.c,size:'small',showInfo:false,style:{flex:1}}),
+                React.createElement(Text,{type:'secondary',style:{fontSize:12,width:24,textAlign:'right'}},x.v)
+              )
+            )
+          )
+        ))
+      ),
+      React.createElement(Card,{title:'问题 Chunk 列表',
+        extra:React.createElement(Space,null,React.createElement(Button,{type:'primary',danger:true,ghost:true,size:'small'},'过短 (154)'),React.createElement(Button,{size:'small'},'重复 (12)')),
+        style:{borderRadius:8,marginBottom:20}},
+        React.createElement(Table,{columns:qCols,dataSource:problemChunks,rowKey:'id',size:'small',pagination:false})
+      ),
+      React.createElement(Flex,{justify:'space-between'},
+        React.createElement(Text,{type:'secondary',style:{fontSize:12}},'共 166 个问题 Chunk'),
+        React.createElement(Space,null,React.createElement(Button,{onClick:()=>setActiveTab('config')},'重新切片'),React.createElement(Button,{type:'primary',danger:true,icon:React.createElement(DeleteOutlined)},'一键清理'))
+      )
+    );
+  }
+
+  return React.createElement('div',{className:'fade-in'},
+    React.createElement('div',{className:'chunk-header'},
+      React.createElement(Space,null,
+        React.createElement(Button,{type:'text',icon:React.createElement(ArrowLeftOutlined),onClick:onBack}),
+        React.createElement(Breadcrumb,{items:[{title:React.createElement('a',{onClick:onBack},'知识管理')},{title:doc?.name||'文档切片配置'}]}),
+        React.createElement(Tag,{color:'blue'},'交互原型 v2.0')
+      ),
+      React.createElement(Space,null,
+        React.createElement(Text,{type:'secondary',style:{fontSize:13}},
+          React.createElement('span',{style:{display:'inline-flex',alignItems:'center',gap:4}},
+            React.createElement('span',{style:{width:6,height:6,borderRadius:'50%',background:'#52c41a',display:'inline-block'}}),
+            '知识库：',doc?.name||'产品手册 2024'
+          )
+        ),
+        React.createElement(Button,{type:'primary'},'保存配置')
+      )
+    ),
+    React.createElement('div',{className:'chunk-page'},
+      React.createElement(Tabs,{activeKey:activeTab,onChange:setActiveTab,size:'large',items:[
+        {key:'config',label:React.createElement(Space,null,React.createElement(SettingOutlined),'切片配置'),children:React.createElement(ConfigTab)},
+        {key:'preview',label:React.createElement(Space,null,React.createElement(EyeOutlined),'切片预览'),children:React.createElement(PreviewTab)},
+        {key:'quality',label:React.createElement(Space,null,React.createElement(BarChartOutlined),'质量看板'),children:React.createElement(QualityTab)},
+      ]})
+    )
+  );
+}
+
+// ============================
+// App
+// ============================
+function App() {
+  const [page, setPage] = useState('list');
+  const [selectedKB, setSelectedKB] = useState(null);
+  const [selectedDoc, setSelectedDoc] = useState(null);
+  const [chunkTab, setChunkTab] = useState('config');
+
+  return React.createElement(ConfigProvider,{theme:{token:{colorPrimary:'#1677ff',borderRadius:6,fontFamily:"-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue',sans-serif"}}},
+    React.createElement(TopNav,{onGoHome:()=>{setPage('list');setSelectedKB(null);setSelectedDoc(null)}}),
+    page==='list' && React.createElement(KBListPage,{
+      onSelectKB:kb=>{setSelectedKB(kb);setPage('detail')},
+      onGoChunkConfig:(doc,tab)=>{setSelectedDoc(doc);setChunkTab(tab||'config');setPage('chunk')}
+    }),
+    page==='detail' && selectedKB && React.createElement(KBDetailPage,{
+      kb:selectedKB,
+      onBack:()=>{setPage('list');setSelectedKB(null)},
+      onGoChunkConfig:(doc,tab)=>{setSelectedDoc(doc);setChunkTab(tab||'config');setPage('chunk')}
+    }),
+    page==='chunk' && React.createElement(ChunkConfigPage,{
+      doc:selectedDoc,
+      initialTab:chunkTab,
+      onBack:()=>{setPage(selectedKB?'detail':'list')}
+    })
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+</script>
+</body>
+</html>
