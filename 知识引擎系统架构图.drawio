@@ -1,0 +1,194 @@
+<mxfile host="app.diagrams.net" modified="2026-03-20T00:00:00.000Z" agent="Claude Code" version="24.0.0">
+  <diagram id="knowledge-engine-arch" name="知识引擎系统架构">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- 标题 -->
+        <mxCell id="title" value="&lt;b&gt;企业知识引擎 · 系统架构图&lt;/b&gt;" style="text;html=1;fontSize=20;fontFamily=PingFang SC;align=center;verticalAlign=middle;fillColor=none;strokeColor=none;fontColor=#1d2129;" vertex="1" parent="1">
+          <mxGeometry x="500" y="20" width="400" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== 用户接入层 ===== -->
+        <mxCell id="layer1-bg" value="" style="rounded=1;whiteSpace=wrap;fillColor=#E8F3FF;strokeColor=#1677FF;strokeWidth=1;dashed=1;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="1320" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="layer1-label" value="&lt;b&gt;用户接入层&lt;/b&gt;" style="text;html=1;fontSize=13;fontFamily=PingFang SC;align=left;verticalAlign=middle;fillColor=none;strokeColor=none;fontColor=#1677FF;" vertex="1" parent="1">
+          <mxGeometry x="50" y="85" width="100" height="24" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="web" value="&lt;b&gt;Web 管理台&lt;/b&gt;&lt;br&gt;知识管理 / 问答测试" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1677FF;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="80" y="112" width="160" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="api" value="&lt;b&gt;Open API&lt;/b&gt;&lt;br&gt;RESTful / WebSocket" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1677FF;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="280" y="112" width="160" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="sdk" value="&lt;b&gt;SDK&lt;/b&gt;&lt;br&gt;Python / JavaScript" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1677FF;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="480" y="112" width="160" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="feishu" value="&lt;b&gt;飞书集成&lt;/b&gt;&lt;br&gt;Bot / 文档同步" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1677FF;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="680" y="112" width="160" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="sophon" value="&lt;b&gt;Sophon 接入&lt;/b&gt;&lt;br&gt;DSL 查询 / 外部调用" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1677FF;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="880" y="112" width="160" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="wechat" value="&lt;b&gt;微信 / 企微&lt;/b&gt;&lt;br&gt;客服问答接入" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1677FF;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="112" width="160" height="52" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== 应用服务层 ===== -->
+        <mxCell id="layer2-bg" value="" style="rounded=1;whiteSpace=wrap;fillColor=#F6FFED;strokeColor=#52C41A;strokeWidth=1;dashed=1;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="210" width="1320" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="layer2-label" value="&lt;b&gt;应用服务层&lt;/b&gt;" style="text;html=1;fontSize=13;fontFamily=PingFang SC;align=left;verticalAlign=middle;fillColor=none;strokeColor=none;fontColor=#52C41A;" vertex="1" parent="1">
+          <mxGeometry x="50" y="215" width="100" height="24" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="chat" value="&lt;b&gt;智能问答服务&lt;/b&gt;&lt;br&gt;多轮对话 / RAG 检索&lt;br&gt;意图识别 / 答案生成" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#52C41A;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="80" y="242" width="200" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="kbmgmt" value="&lt;b&gt;知识管理服务&lt;/b&gt;&lt;br&gt;知识库 CRUD / 权限控制&lt;br&gt;文档导入 / 分类标签" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#52C41A;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="320" y="242" width="200" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="chunk" value="&lt;b&gt;切片引擎&lt;/b&gt;&lt;br&gt;5种切片策略 / 质量检测&lt;br&gt;Contextual 增强" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#52C41A;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="560" y="242" width="200" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="graph" value="&lt;b&gt;知识图谱服务&lt;/b&gt;&lt;br&gt;实体抽取 / 关系推理&lt;br&gt;本体管理 / GraphRAG" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#52C41A;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="800" y="242" width="200" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="agent" value="&lt;b&gt;Agent 服务&lt;/b&gt;&lt;br&gt;营销Agent / 分析Agent&lt;br&gt;工具调用 / 任务编排" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#52C41A;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="242" width="200" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== 核心引擎层 ===== -->
+        <mxCell id="layer3-bg" value="" style="rounded=1;whiteSpace=wrap;fillColor=#FFF7E6;strokeColor=#FA8C16;strokeWidth=1;dashed=1;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="360" width="1320" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="layer3-label" value="&lt;b&gt;核心引擎层&lt;/b&gt;" style="text;html=1;fontSize=13;fontFamily=PingFang SC;align=left;verticalAlign=middle;fillColor=none;strokeColor=none;fontColor=#FA8C16;" vertex="1" parent="1">
+          <mxGeometry x="50" y="365" width="100" height="24" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="retrieval" value="&lt;b&gt;检索引擎&lt;/b&gt;&lt;br&gt;语义检索 / 关键词检索&lt;br&gt;混合检索 / Reranker" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FA8C16;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="80" y="392" width="200" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="embedding" value="&lt;b&gt;向量化引擎&lt;/b&gt;&lt;br&gt;BGE-M3 / text-embedding-3&lt;br&gt;批量向量化 / 增量更新" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FA8C16;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="320" y="392" width="200" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="parser" value="&lt;b&gt;文档解析引擎&lt;/b&gt;&lt;br&gt;PDF / Word / Excel / MD&lt;br&gt;OCR / 表格提取" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FA8C16;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="560" y="392" width="200" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="llm" value="&lt;b&gt;LLM 管理&lt;/b&gt;&lt;br&gt;豆包 / GPT-4o / Claude&lt;br&gt;Prompt 工厂 / Token 计量" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FA8C16;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="800" y="392" width="200" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="nlp" value="&lt;b&gt;NLP 引擎&lt;/b&gt;&lt;br&gt;分词 / NER / 术语库&lt;br&gt;意图分类 / 情感分析" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FA8C16;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="392" width="200" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== 数据存储层 ===== -->
+        <mxCell id="layer4-bg" value="" style="rounded=1;whiteSpace=wrap;fillColor=#F0F0FF;strokeColor=#722ED1;strokeWidth=1;dashed=1;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="510" width="1320" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="layer4-label" value="&lt;b&gt;数据存储层&lt;/b&gt;" style="text;html=1;fontSize=13;fontFamily=PingFang SC;align=left;verticalAlign=middle;fillColor=none;strokeColor=none;fontColor=#722ED1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="515" width="100" height="24" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="mysql" value="&lt;b&gt;MySQL&lt;/b&gt;&lt;br&gt;元数据 / 配置&lt;br&gt;用户 / 权限" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=8;fillColor=#FFFFFF;strokeColor=#722ED1;fontFamily=PingFang SC;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="100" y="542" width="140" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="milvus" value="&lt;b&gt;Milvus / VikingDB&lt;/b&gt;&lt;br&gt;向量存储&lt;br&gt;ANN 检索" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=8;fillColor=#FFFFFF;strokeColor=#722ED1;fontFamily=PingFang SC;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="300" y="542" width="160" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="es" value="&lt;b&gt;Elasticsearch&lt;/b&gt;&lt;br&gt;全文索引&lt;br&gt;关键词检索" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=8;fillColor=#FFFFFF;strokeColor=#722ED1;fontFamily=PingFang SC;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="520" y="542" width="140" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="redis" value="&lt;b&gt;Redis&lt;/b&gt;&lt;br&gt;缓存 / 会话&lt;br&gt;分布式锁" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=8;fillColor=#FFFFFF;strokeColor=#722ED1;fontFamily=PingFang SC;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="720" y="542" width="140" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3" value="&lt;b&gt;S3 / TOS&lt;/b&gt;&lt;br&gt;文件存储&lt;br&gt;原始文档" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=8;fillColor=#FFFFFF;strokeColor=#722ED1;fontFamily=PingFang SC;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="920" y="542" width="140" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="kafka" value="&lt;b&gt;Kafka&lt;/b&gt;&lt;br&gt;消息队列&lt;br&gt;异步任务" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=8;fillColor=#FFFFFF;strokeColor=#722ED1;fontFamily=PingFang SC;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="542" width="140" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== 基础设施层 ===== -->
+        <mxCell id="layer5-bg" value="" style="rounded=1;whiteSpace=wrap;fillColor=#F5F5F5;strokeColor=#8C8C8C;strokeWidth=1;dashed=1;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="660" width="1320" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="layer5-label" value="&lt;b&gt;基础设施层&lt;/b&gt;" style="text;html=1;fontSize=13;fontFamily=PingFang SC;align=left;verticalAlign=middle;fillColor=none;strokeColor=none;fontColor=#8C8C8C;" vertex="1" parent="1">
+          <mxGeometry x="50" y="665" width="100" height="24" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="k8s" value="&lt;b&gt;Kubernetes&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8C8C8C;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="80" y="692" width="140" height="36" as="geometry"/>
+        </mxCell>
+        <mxCell id="monitor" value="&lt;b&gt;监控 · Grafana&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8C8C8C;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="260" y="692" width="140" height="36" as="geometry"/>
+        </mxCell>
+        <mxCell id="trace" value="&lt;b&gt;链路追踪 · Fornax&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8C8C8C;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="440" y="692" width="160" height="36" as="geometry"/>
+        </mxCell>
+        <mxCell id="log" value="&lt;b&gt;日志 · ELK&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8C8C8C;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="640" y="692" width="140" height="36" as="geometry"/>
+        </mxCell>
+        <mxCell id="ci" value="&lt;b&gt;CI/CD · VPC 部署&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8C8C8C;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="820" y="692" width="160" height="36" as="geometry"/>
+        </mxCell>
+        <mxCell id="auth" value="&lt;b&gt;IAM 认证授权&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8C8C8C;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="692" width="140" height="36" as="geometry"/>
+        </mxCell>
+        <mxCell id="cdn" value="&lt;b&gt;CDN · 静态资源&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8C8C8C;fontFamily=PingFang SC;fontSize=11;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="692" width="140" height="36" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== 连线 ===== -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#BFBFBF;strokeWidth=1;" edge="1" parent="1" source="web" target="chat">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#BFBFBF;strokeWidth=1;" edge="1" parent="1" source="api" target="kbmgmt">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#BFBFBF;strokeWidth=1;" edge="1" parent="1" source="sdk" target="chunk">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#BFBFBF;strokeWidth=1;" edge="1" parent="1" source="feishu" target="graph">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#BFBFBF;strokeWidth=1;" edge="1" parent="1" source="sophon" target="agent">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#BFBFBF;strokeWidth=1;" edge="1" parent="1" source="chat" target="retrieval">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#BFBFBF;strokeWidth=1;" edge="1" parent="1" source="chunk" target="parser">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#BFBFBF;strokeWidth=1;" edge="1" parent="1" source="kbmgmt" target="embedding">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#BFBFBF;strokeWidth=1;" edge="1" parent="1" source="graph" target="llm">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#BFBFBF;strokeWidth=1;" edge="1" parent="1" source="agent" target="nlp">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#BFBFBF;strokeWidth=1;" edge="1" parent="1" source="retrieval" target="milvus">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#BFBFBF;strokeWidth=1;" edge="1" parent="1" source="retrieval" target="es">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#BFBFBF;strokeWidth=1;" edge="1" parent="1" source="embedding" target="milvus">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#BFBFBF;strokeWidth=1;" edge="1" parent="1" source="parser" target="s3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e15" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#BFBFBF;strokeWidth=1;" edge="1" parent="1" source="kbmgmt" target="mysql">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
